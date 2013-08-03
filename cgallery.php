@@ -368,7 +368,7 @@
             options = options || { };
             var image = options.image || $image.attr("src");
             var background = $("body").css("background-color");
-            var hash = "#" + image + "+b:" + background;
+            var hash = "#" + image + "+b:" + background.replace(/, /g, ",");
             window.location.hash = hash;
         }
 
@@ -548,11 +548,13 @@
                 image = IMAGES[0];
             }
 
-            setImage(image);
-
             if (params.b) {
                 $("body").css("background-color", params.b);
             }
+
+            setTimeout(function() {
+                setImage(image);
+            });
         }
 
         function main() {
