@@ -557,6 +557,15 @@
             });
         }
 
+        function keyPressed(event) {
+            if (event.keyCode === 39) { /* right arrow */
+                moveBy(1);
+            }
+            else if (event.keyCode === 37) { /*left arrow */
+                moveBy(-1);
+            }
+        }
+
         function main() {
             /* initialize the color picker */
             var colorButtons = $(".color-picker .color-button");
@@ -582,6 +591,7 @@
             $doc.on("click", ".color-picker .color-button", colorButtonClicked);
             $doc.on("click", ".button.prev", previous);
             $doc.on("click", ".button.next", next);
+            $body.on("keydown", keyPressed);
             $(".strip img").on("load", thumbnailLoaded);
 
             renderInitialView();
