@@ -340,6 +340,8 @@
         var hasScrollbar = false;
         var hasVerticalThumbs = false;
         var loadedThumbnails = 0;
+        var currentImage, lastHash;
+        var hashPollInterval;
 
         function parseHash() {
             var result = { };
@@ -353,10 +355,10 @@
                 for (var i = 0; i < parts.length; i++) {
                     var keyValue = parts[i].split(":");
                     if (keyValue.length === 1) {
-                        result.i = keyValue[0];
+                        result.i = decodeURIComponent(keyValue[0]);
                     }
                     if (keyValue.length === 2) {
-                        result[keyValue[0]] = keyValue[1];
+                        result[keyValue[0]] = decodeURIComponent(keyValue[1]);
                     }
                 }
             }
@@ -364,12 +366,27 @@
             return result;
         }
 
+        function pollHash() {
+            if (!hashPollInterval) {
+                setInterval(function() {
+                    if (window.location.hash !== lastHash) {
+                        clearInterval(hashPollInterval);
+                        hashPollInterval = null;
+                        renderInitialView();
+                    }
+                }, 250);
+            }
+        }
+
         function writeHash(options) {
             options = options || { };
             var image = options.image || $image.attr("src");
             var background = $("body").css("background-color");
-            var hash = "#" + image + "+b:" + background.replace(/, /g, ",");
-            window.location.hash = hash;
+            var hash = "#" + encodeURIComponent(image) + "+b:" + background.replace(/, /g, ",");
+
+            if (hash !== window.location.hash) {
+                window.location.hash = lastHash = hash;
+            }
         }
 
         function findThumbnailForImage(filename) {
@@ -392,6 +409,7 @@
 
             setLoading(true);
             $image.attr("src", "");
+            currentImage = filename;
 
             setTimeout(function() {
                 $image.attr("src", filename);
@@ -554,6 +572,8 @@
 
             setTimeout(function() {
                 setImage(image);
+                writeHash();
+                pollHash();
             });
         }
 
