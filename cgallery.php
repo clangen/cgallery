@@ -572,7 +572,7 @@
 
             setTimeout(function() {
                 setImage(image);
-                writeHash();
+                writeHash({image: image});
                 pollHash();
             });
         }
