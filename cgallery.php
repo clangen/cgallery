@@ -343,10 +343,15 @@
         var currentImage, lastHash;
         var hashPollInterval;
 
+        function getHashFromUrl() {
+            /* some browsers decode the hash, we don't want that */
+            return "#" + (window.location.href.split("#")[1] || "");
+        }
+
         function parseHash() {
             var result = { };
 
-            var hash = window.location.hash;
+            var hash = getHashFromUrl();
 
             if (hash) {
                 hash = hash.substring(1);
@@ -369,7 +374,7 @@
         function pollHash() {
             if (!hashPollInterval) {
                 setInterval(function() {
-                    if (window.location.hash !== lastHash) {
+                    if (getHashFromUrl() !== lastHash) {
                         clearInterval(hashPollInterval);
                         hashPollInterval = null;
                         renderInitialView();
@@ -382,9 +387,12 @@
             options = options || { };
             var image = options.image || $image.attr("src");
             var background = $("body").css("background-color");
-            var hash = "#" + encodeURIComponent(image) + "+b:" + background.replace(/, /g, ",");
 
-            if (hash !== window.location.hash) {
+            var hash = "#" + 
+                encodeURIComponent(image) + "+b:" +
+                encodeURIComponent(background.replace(/, /g, ","));
+
+            if (hash !== getHashFromUrl() || hash !== lastHash) {
                 window.location.hash = lastHash = hash;
             }
         }
@@ -578,6 +586,10 @@
         }
 
         function keyPressed(event) {
+            if (event.altKey || event.metaKey) {
+                /* don't swallow browser back/forward shortcuts */
+                return true;
+            }
             if (event.keyCode === 39) { /* right arrow */
                 moveBy(1);
             }
