@@ -272,6 +272,28 @@
     .loading .current-image {
         display: none;
     }
+
+    ::-webkit-scrollbar {
+        height: 10px;
+        width: 12px;
+        background: transparent;
+        margin-bottom: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #666;
+        -webkit-border-radius: 0;
+        border: 1px solid #111;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #bbb;
+    }
+
+    ::-webkit-scrollbar-corner {
+        background: #000;
+    }
+
 </style>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
@@ -280,7 +302,12 @@
 <script>
     /* https://github.com/brandonaaron/jquery-getscrollbarwidth/blob/master/jquery.getscrollbarwidth.js */
     (function($) {
-        $.browser = {msie: navigator.appName == 'Microsoft Internet Explorer'};
+        $.browser = {
+            msie: navigator.appName == 'Microsoft Internet Explorer',
+            chrome: /Chrome/.test(navigator.userAgent),
+            firefox: /Firefox/.test(navigator.userAgent)
+        };
+
         var scrollbarWidth = 0;
         $.getScrollbarWidth = function() {
             if (!scrollbarWidth) {
@@ -325,6 +352,8 @@
         ?>
     ];
 
+    var SCROLLBAR_HEIGHT_FUDGE = 0;
+
     $(document).ready(function() {
         var $body = $("body");
         var $doc = $(document);
@@ -342,19 +371,42 @@
         var loadedThumbnails = 0;
         var currentImage, lastHash;
         var hashPollInterval;
+        var embedded = (window.parent !== window);
+
+        if (embedded) {
+            $(window).on('message', function(event) {
+              event = event.originalEvent || event;
+              var data = event.data;
+              if (data && data.message === 'changeHash') {
+                if (data.options.hash !== getHashFromUrl().substring(1)) {
+                  render(parseHash(data.options.hash));
+                }
+              }
+            });
+        }
+
+        function notifyImageChanged(options) {
+            if (window.parent && window.parent.postMessage) {
+                var hash = generateHash(options).substring(1);
+                var msg = { message: 'hashChanged', options: { hash: hash } };
+                window.parent.postMessage(msg, "*");
+            }
+        }
 
         function getHashFromUrl() {
             /* some browsers decode the hash, we don't want that */
             return "#" + (window.location.href.split("#")[1] || "");
         }
 
-        function parseHash() {
+        function parseHash(hash) {
             var result = { };
 
-            var hash = getHashFromUrl();
+            hash = hash || getHashFromUrl();
 
             if (hash) {
-                hash = hash.substring(1);
+                if (hash.charAt(0) === '#') {
+                  hash = hash.substring(1);
+                }
 
                 var parts = hash.split("+");
                 for (var i = 0; i < parts.length; i++) {
@@ -372,25 +424,34 @@
         }
 
         function pollHash() {
-            if (!hashPollInterval) {
-                setInterval(function() {
+            if (!embedded && !hashPollInterval) {
+                hashPollInterval = setInterval(function() {
                     if (getHashFromUrl() !== lastHash) {
-                        clearInterval(hashPollInterval);
-                        hashPollInterval = null;
-                        renderInitialView();
+                      render();
                     }
                 }, 250);
             }
         }
 
-        function writeHash(options) {
+        function generateHash(options) {
             options = options || { };
             var image = options.image || $image.attr("src");
-            var background = $("body").css("background-color");
+            var background = options.background || $("body").css("background-color");
 
-            var hash = "#" + 
+            var result =
+                "#" +
                 encodeURIComponent(image) + "+b:" +
                 encodeURIComponent(background.replace(/, /g, ","));
+
+            return result;
+        }
+
+        function writeHash(options) {
+            if (embedded) {
+                return;
+            }
+
+            var hash = generateHash(options);
 
             if (hash !== getHashFromUrl() || hash !== lastHash) {
                 window.location.hash = lastHash = hash;
@@ -428,6 +489,8 @@
             updateScrollLeft();
 
             writeHash({image: filename});
+
+            notifyImageChanged({image: filename});
         }
 
         function checkForScrollbar() {
@@ -435,8 +498,8 @@
 
             if (sb !== hasScrollbar) {
                 var height = BASE_STRIP_HEIGHT + (sb ? scrollbarSize : 0);
-                $footer.css("height", height);
-                $middle.css("bottom", height);
+                $footer.css("height", height + SCROLLBAR_HEIGHT_FUDGE);
+                $middle.css("bottom", height + SCROLLBAR_HEIGHT_FUDGE);
                 hasScrollbar = sb;
             }
         }
@@ -523,7 +586,7 @@
         }
 
         function imageClicked(event) {
-            window.location = $image.attr("src");
+            window.open($image.attr("src"));
         }
 
         function colorButtonClicked(event) {
@@ -566,8 +629,8 @@
             moveBy(1);
         }
 
-        function renderInitialView() {
-            var params = parseHash();
+        function render(params) {
+            params = params || parseHash();
 
             var image = params.i;
             if (!image || IMAGES.indexOf(image) === -1) {
@@ -599,6 +662,13 @@
         }
 
         function main() {
+            if ($.browser.chrome) {
+                SCROLLBAR_HEIGHT_FUDGE = -4;
+            }
+            else if ($.browser.firefox) {
+                SCROLLBAR_HEIGHT_FUDGE = 0;
+            }
+
             /* initialize the color picker */
             var colorButtons = $(".color-picker .color-button");
             for (var i = 0; i < colorButtons.length; i++) {
@@ -626,7 +696,7 @@
             $body.on("keydown", keyPressed);
             $(".strip img").on("load", thumbnailLoaded);
 
-            renderInitialView();
+            render();
         }
 
         main();
