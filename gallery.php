@@ -198,6 +198,23 @@
         border-color: #666;
     }
 
+    .pseudo-button {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      cursor: pointer;
+    }
+    
+    .pseudo-button.prev {
+      left: 0;
+      right: 50%;
+    }
+
+    .pseudo-button.next {
+      right: 0;
+      left: 50%;
+    }
+
     .button {
         font-family: monospace;
         position: absolute;
@@ -214,6 +231,7 @@
         line-height: 128px;
     }
 
+    .pseudo-button:hover .button,
     .button:hover {
         background-color: #2a2a2a;
     }
@@ -228,6 +246,7 @@
 
     .center {
         position: absolute;
+        pointer-events: none;
         left: 40px;
         right: 40px;
         bottom: 0;
@@ -266,6 +285,7 @@
         border: 4px solid black;
         box-sizing: border-box;
         -moz-box-sizing: border-box;
+        pointer-events: all;
         cursor: pointer;
     }
 
@@ -385,7 +405,7 @@
             });
         }
 
-        function notifyImageChanged(options) {
+        function notifyHashChanged(options) {
             if (window.parent && window.parent.postMessage) {
                 var hash = generateHash(options).substring(1);
                 var msg = { message: 'hashChanged', options: { hash: hash } };
@@ -489,15 +509,14 @@
             updateScrollLeft();
 
             writeHash({image: filename});
-
-            notifyImageChanged({image: filename});
+            notifyHashChanged({image: filename});
         }
 
         function checkForScrollbar() {
             var sb = $strip[0].scrollWidth > $strip[0].clientWidth;
 
             if (sb !== hasScrollbar) {
-                var height = BASE_STRIP_HEIGHT + (sb ? scrollbarSize : 0);
+                var height = BASE_STRIP_HEIGHT + (sb ? scrollbarSize : 0) + 4;
                 $footer.css("height", height + SCROLLBAR_HEIGHT_FUDGE);
                 $middle.css("bottom", height + SCROLLBAR_HEIGHT_FUDGE);
                 hasScrollbar = sb;
@@ -595,6 +614,7 @@
             if (bg) {
                 $('body').css("background-color", bg);
                 writeHash();
+                notifyHashChanged();
             }
         }
 
@@ -691,7 +711,9 @@
             $win.on("resize", dimensionsChanged);
             $doc.on("click", ".strip img", thumbnailClicked);
             $doc.on("click", ".color-picker .color-button", colorButtonClicked);
+            $doc.on("click", ".pseudo-button.prev", previous);
             $doc.on("click", ".button.prev", previous);
+            $doc.on("click", ".pseudo-button.next", next);
             $doc.on("click", ".button.next", next);
             $body.on("keydown", keyPressed);
             $(".strip img").on("load", thumbnailLoaded);
@@ -717,8 +739,12 @@
         </ul>
     </div>
     <div class="middle">
-        <div class="button prev">&lt;</div>
-        <div class="button next">&gt;</div>
+        <div class="pseudo-button prev">
+          <div class="button prev">&lt;</div>
+        </div>
+        <div class="pseudo-button next">
+          <div class="button next">&gt;</div>
+        </div>
         <div class="center">
             <div class="current-image-container">
                 <img class="current-image">

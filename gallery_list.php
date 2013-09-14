@@ -15,7 +15,9 @@
 
     while (($file = readdir($dir)) !== false) {
       if ($file != "." && $file != ".." && is_dir($file)) {
-        array_push($galleries, $file);
+          if (!is_file($file . "/.hidden")) {
+            array_push($galleries, $file);
+          }
       }
     }
 
