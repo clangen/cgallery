@@ -712,9 +712,7 @@
             $doc.on("click", ".strip img", thumbnailClicked);
             $doc.on("click", ".color-picker .color-button", colorButtonClicked);
             $doc.on("click", ".pseudo-button.prev", previous);
-            $doc.on("click", ".button.prev", previous);
             $doc.on("click", ".pseudo-button.next", next);
-            $doc.on("click", ".button.next", next);
             $body.on("keydown", keyPressed);
             $(".strip img").on("load", thumbnailLoaded);
 
