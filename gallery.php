@@ -496,7 +496,7 @@
 
         function setImage(filename) {
             if ($image.attr("src") === filename) {
-                return;
+                return false;
             }
 
             setLoading(true);
@@ -599,7 +599,9 @@
 
         function thumbnailClicked(event) {
             $image.css({"visibility": "hidden"});
-            setImage($(event.target).attr("data-large"));
+            if (!setImage($(event.target).attr("data-large"))) {
+              $image.css({"visibility": "visible"}); /* cal: gross but cheap */
+            }
         }
 
         function imageLoaded(event) {
