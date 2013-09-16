@@ -36,8 +36,8 @@
 
 <style type="text/css">
     body {
-        font-family: sans;
-        background-color: rgb(46, 46, 46);
+      font-family: sans;
+      background-color: rgb(46, 46, 46);
     }
 
     .main {
@@ -59,21 +59,19 @@
       top: 20px;
       bottom: 20px;
       width: 180px;
-      overflow-x: hidden;
-      overflow-y: auto;
     }
 
     ul, li {
-        margin: 0;
-        padding: 0;
-        margin-bottom: 10px;
-        list-style-type: none;
+      margin: 0;
+      padding: 0;
+      margin-bottom: 10px;
+      list-style-type: none;
     }
 
     .item a {
-        color: #aaa;
-        font-size: 15px;
-        text-decoration: none;
+      color: #aaa;
+      font-size: 15px;
+      text-decoration: none;
     }
 
     .item.active a,
@@ -85,22 +83,35 @@
     }
 
     .item a:hover {
-        color: #ddd;
-        text-decoration: underline;
-        cursor: pointer;
+      color: #ddd;
+      text-decoration: underline;
+      cursor: pointer;
     }
 
     .title {
-        font-weight: bold;
-        font-size: 32px;
-        color: #666;
-        text-shadow: 0 0 8px #222;
-        text-decoration: underline;
-        padding-bottom: 8px;
+      font-weight: bold;
+      font-size: 32px;
+      color: #666;
+      text-shadow: 0 0 8px #222;
+      text-decoration: underline;
+      padding-bottom: 8px;
+    }
+
+    .date {
+      font-size: 60%;
+      color: #666;
     }
 
     .gallery-list {
-        padding-left: 0px;
+      position: absolute;
+      top: 40px;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+       -webkit-overflow-scrolling: touch;
+      padding-left: 0px;
     }
 
     .embedded {
@@ -112,41 +123,86 @@
     .embedded.hidden {
       visibility: hidden;
     }
+
+    ::-webkit-scrollbar {
+      height: 10px;
+      width: 12px;
+      background: transparent;
+      margin-bottom: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #666;
+      -webkit-border-radius: 0;
+      border: 1px solid #111;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #bbb;
+    }
+
+    ::-webkit-scrollbar-corner {
+      background: #000;
+    }
 </style>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 
 <script type="text/javascript">
+    /* YYYY-MM-DD or YYYY-MM */
+    var SIMPLE_DATE_REGEX = /^\d{4}-\d{2}(-\d{2})?$/;
+
     var LIST_ITEM_TEMPLATE =
-        '<li class="item gallery-name">' +
-          '<a href="{{url}}" data-index="{{index}}">' +
-            '{{caption}}' +
-          '</div>' +
-        '</li>';
+      '<li class="item gallery-name">' +
+        '<a href="{{url}}" data-index="{{index}}">' +
+          '{{caption}}' +
+        '</a>' +
+      '</li>';
+
+    var LIST_ITEM_TEMPLATE_WITH_DATE =
+      '<li class="item gallery-name">' +
+        '<a href="{{url}}" data-index="{{index}}">' +
+          '{{caption}}' +
+        '</a>' +
+        '<span class="date"> ({{date}})</span>' +
+      '</li>';
 
     var GALLERIES = [
-        <?php
-            global $galleryList; /* generated above */
-            foreach ($galleryList as $gallery) {
-              printf('"' . $gallery . '",' . "\n");
-            }
-        ?>
+      <?php
+        global $galleryList; /* generated above */
+        foreach ($galleryList as $gallery) {
+          printf('"' . $gallery . '",' . "\n");
+        }
+      ?>
     ];
 
     var currentGallery = '';
     var lastHash;
 
     function writeHash(hash) {
-        lastHash = "#" + hash;
+      lastHash = "#" + hash;
 
-        if (hash !== window.location.hash) {
-          window.location.hash = hash;
-        }
+      if (hash !== window.location.hash) {
+        window.location.hash = hash;
+      }
     }
 
     function getHashFromUrl() {
-        /* some browsers decode the hash, we don't want that */
-        return "#" + (window.location.href.split("#")[1] || "");
+      /* some browsers decode the hash, we don't want that */
+      return "#" + (window.location.href.split("#")[1] || "");
+    }
+
+    function parseListItem(caption) {
+      parts = (caption || "").split(" ");
+      var len = parts.length;
+
+      var date;
+      if (len > 1 && SIMPLE_DATE_REGEX.test(parts[len - 1])) {
+        date = parts.pop();
+        caption = parts.join(' ');
+      }
+
+      return { date: date, caption: caption }
     }
 
     function urlAtIndex(index, hash) {
@@ -232,6 +288,26 @@
             writeHash(GALLERIES[index] + finalHashPath);
           }
         };
+        
+        var pollHash = function() {
+          if (!hashPollInterval) {
+            hashPollInterval = setInterval(function() {
+              var currentHash = getHashFromUrl();
+              if (currentHash !== lastHash) {
+                select(currentHash);
+                lastHash = currentHash;
+              }
+            }, 250);
+          }
+        };
+
+        var scrollToSelectedGallery = function() {
+          var $active = $('li.item.active');
+          if ($active.length) {
+            var pos = $active.position().top;
+            $('.gallery-list').animate({scrollTop: pos});
+          }
+        };
 
         $('.embedded').on('load', function() {
           $('.embedded').removeClass('hidden');
@@ -244,31 +320,29 @@
           select(index);
         });
 
+        /* generate gallery list, add to DOM */
         var $list = $(".gallery-list");
+        var gallery, caption, parts, template, html;
         for (var i = 0; i < GALLERIES.length; i++) {
-            var gallery = GALLERIES[i];
-            var caption = gallery.replace(/_/g, " ");
-            var html = LIST_ITEM_TEMPLATE
+            gallery = GALLERIES[i];
+
+            caption = gallery.replace(/_/g, " ");
+            parts = parseListItem(caption);
+
+            template = parts.date ?
+              LIST_ITEM_TEMPLATE_WITH_DATE : LIST_ITEM_TEMPLATE;
+
+            html = template
                 .replace("{{url}}", gallery)
-                .replace("{{caption}}", caption)
-                .replace("{{index}}", i);
+                .replace("{{caption}}", parts.caption)
+                .replace("{{index}}", i)
+                .replace("{{date}}", parts.date);
 
             $list.append(html);
         }
 
-        function pollHash() {
-            if (!hashPollInterval) {
-                hashPollInterval = setInterval(function() {
-                    var currentHash = getHashFromUrl();
-                    if (currentHash !== lastHash) {
-                      select(currentHash);
-                      lastHash = currentHash;
-                    }
-                }, 250);
-            }
-        }
-
         select(getHashFromUrl());
+        scrollToSelectedGallery();
         pollHash();
     });
 

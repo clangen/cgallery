@@ -23,11 +23,13 @@
         while (($file = readdir($dir)) !== false) {
             $tail = strtolower(substr($file, strlen($file) - 3, 3));
 
-            if (strcmp($tail, "jpg") == 0
-                || strcmp($tail, "gif") == 0
-                || strcmp($tail, "png") == 0)
-            {
-                array_push($images, $file);
+            if (is_file($file)) {
+                if (strcmp($tail, "jpg") == 0
+                    || strcmp($tail, "gif") == 0
+                    || strcmp($tail, "png") == 0)
+                {
+                    array_push($images, $file);
+                }
             }
         }
 
@@ -168,6 +170,7 @@
         height: 100px;
         overflow-x: auto;
         overflow-y: hidden;
+         -webkit-overflow-scrolling: touch;
         background-color: #222;
         border-top: 1px solid black;
     }
@@ -204,7 +207,7 @@
       bottom: 0;
       cursor: pointer;
     }
-    
+
     .pseudo-button.prev {
       left: 0;
       right: 50%;
