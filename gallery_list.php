@@ -36,7 +36,7 @@
 
 <style type="text/css">
     body {
-      font-family: sans;
+      font-family: sans-serif;
       background-color: rgb(46, 46, 46);
     }
 
@@ -64,13 +64,13 @@
     ul, li {
       margin: 0;
       padding: 0;
-      margin-bottom: 10px;
+      padding-bottom: 6px;
       list-style-type: none;
     }
 
     .item a {
       color: #aaa;
-      font-size: 15px;
+      font-size: 12px;
       text-decoration: none;
     }
 
@@ -90,7 +90,7 @@
 
     .title {
       font-weight: bold;
-      font-size: 32px;
+      font-size: 30px;
       color: #666;
       text-shadow: 0 0 8px #222;
       text-decoration: underline;
@@ -105,13 +105,35 @@
     .gallery-list {
       position: absolute;
       top: 40px;
-      bottom: 0;
+      bottom: 20px;
       left: 0;
       right: 0;
       overflow-x: hidden;
       overflow-y: auto;
-       -webkit-overflow-scrolling: touch;
+      -webkit-overflow-scrolling: touch;
       padding-left: 0px;
+    }
+
+    .footer {
+      position: absolute;
+      text-align: center;
+      line-height: 1.2em;
+      left: 210px;
+      right: 0;
+      bottom: 0;
+      height: 20px;
+    }
+
+    .footer a {
+      color: #666;
+      font-size: 11px;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      color: #bbb;
+      text-shadow: 0 0 3px #000;
+      text-decoration: underline;
     }
 
     .embedded {
@@ -358,5 +380,9 @@
   <div class="main">
     <iframe class="embedded hidden"></iframe>
   </div>
+  <div class="footer">
+    <a href="https://bitbucket.org/clangen/cgallery" target="_new">https://bitbucket.org/clangen/cgallery</a>
+  </div>
+
 </body>
 </html>

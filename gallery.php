@@ -205,7 +205,7 @@
       position: absolute;
       top: 0;
       bottom: 0;
-      cursor: pointer;
+      /*cursor: pointer;*/
     }
 
     .pseudo-button.prev {
@@ -716,8 +716,8 @@
             $win.on("resize", dimensionsChanged);
             $doc.on("click", ".strip img", thumbnailClicked);
             $doc.on("click", ".color-picker .color-button", colorButtonClicked);
-            $doc.on("click", ".pseudo-button.prev", previous);
-            $doc.on("click", ".pseudo-button.next", next);
+            $doc.on("click", ".button.prev", previous);
+            $doc.on("click", ".button.next", next);
             $body.on("keydown", keyPressed);
             $(".strip img").on("load", thumbnailLoaded);
 
