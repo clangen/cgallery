@@ -147,11 +147,12 @@
     }
 
     .strip img {
-        border: 4px solid black;
-        margin-right: 4px;
+        border: 2px solid black;
+        margin-right: 6px;
         cursor: pointer;
         box-sizing: border-box;
         -moz-box-sizing: border-box;
+        box-shadow: 0 0 4px #111
     }
 
     .strip img:hover {
@@ -159,20 +160,21 @@
     }
 
     .strip img.active {
-        border: 4px solid white;
+        border: 2px solid white;
     }
 
     .footer {
+        -webkit-overflow-scrolling: touch;
         position: absolute;
         bottom: 0;
         left: 0;
         right: 0;
-        height: 100px;
+        height: 96px;
         overflow-x: auto;
         overflow-y: hidden;
-         -webkit-overflow-scrolling: touch;
         background-color: #222;
         border-top: 1px solid black;
+        box-shadow: 0 0 4px #111;
     }
 
     .middle {
@@ -180,7 +182,7 @@
         left: 0;
         right: 0;
         top: 25px;
-        bottom: 100px;
+        bottom: 96px;
     }
 
     .color-picker {
@@ -195,6 +197,7 @@
         background-color: #444;
         border: 1px solid #ccc;
         cursor: pointer;
+        box-shadow: 0 0 4px #111
     }
 
     .color-button:hover {
@@ -232,9 +235,10 @@
         font-size: 18px;
         text-align: center;
         line-height: 128px;
+        box-shadow: 0px 0px 4px #222;
     }
 
-    .pseudo-button:hover .button,
+    /*.pseudo-button:hover .button,*/
     .button:hover {
         background-color: #2a2a2a;
     }
@@ -357,7 +361,7 @@
 </script>
 
 <script>
-    var BASE_STRIP_HEIGHT = 100;
+    var BASE_STRIP_HEIGHT = 94;
 
     var THUMB_TEMPLATE = '<img data-large="{{large}}" src="{{thumb}}">';
 

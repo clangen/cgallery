@@ -1,16 +1,15 @@
 cgallery
 =========
 
-cgallery is a two-file gallery management system. it only uses two (2) php (yes, php) files.
+cgallery is a very simple photo gallery management system. it only uses two (2) php (yes, php) files.
 
 ```sh
-git clone [repo]
-ls cgallery/
+git clone git@bitbucket.org:clangen/cgallery.git
 ```
 
 ### gallery.php:
-- index for a single gallery -- a directory of images 
-- automatically creates thumbnails
+- index page for a single gallery, to be dropped into a directory of images 
+- automatically creates thumbnails and generates layout
 
 ```sh
 mkdir my_gallery_2013-09
