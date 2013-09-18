@@ -381,7 +381,7 @@
     <iframe class="embedded hidden"></iframe>
   </div>
   <div class="footer">
-    <a href="https://bitbucket.org/clangen/cgallery" target="_new">https://bitbucket.org/clangen/cgallery</a>
+    <a href="https://bitbucket.org/clangen/cgallery/src" target="_new">https://bitbucket.org/clangen/cgallery</a>
   </div>
 
 </body>
