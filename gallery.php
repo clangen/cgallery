@@ -147,20 +147,22 @@
     }
 
     .strip img {
-        border: 2px solid black;
+        border: 3px solid black;
         margin-right: 6px;
         cursor: pointer;
         box-sizing: border-box;
         -moz-box-sizing: border-box;
-        box-shadow: 0 0 4px #111
+        box-shadow: 0 0 4px #111;
+        opacity: 0.75;
     }
 
     .strip img:hover {
-        border-color: #777;
+        opacity: 1.0;
     }
 
     .strip img.active {
-        border: 2px solid white;
+        border: 3px solid white;
+        opacity: 1.0;
     }
 
     .footer {
@@ -174,6 +176,7 @@
         overflow-y: hidden;
         background-color: #222;
         border-top: 1px solid black;
+        border-bottom: 1px solid #111;
         box-shadow: 0 0 4px #111;
     }
 
@@ -212,12 +215,12 @@
     }
 
     .pseudo-button.prev {
-      left: 0;
+      left: 8px;
       right: 50%;
     }
 
     .pseudo-button.next {
-      right: 0;
+      right: 8px;
       left: 50%;
     }
 
@@ -254,8 +257,8 @@
     .center {
         position: absolute;
         pointer-events: none;
-        left: 40px;
-        right: 40px;
+        left: 50px;
+        right: 50px;
         bottom: 0;
         top: 0;
     }
@@ -309,7 +312,6 @@
 
     ::-webkit-scrollbar-thumb {
         background: #666;
-        -webkit-border-radius: 0;
         border: 1px solid #111;
     }
 
@@ -361,7 +363,7 @@
 </script>
 
 <script>
-    var BASE_STRIP_HEIGHT = 94;
+    var BASE_STRIP_HEIGHT = 98;
 
     var THUMB_TEMPLATE = '<img data-large="{{large}}" src="{{thumb}}">';
 
@@ -724,6 +726,7 @@
             $doc.on("click", ".button.next", next);
             $body.on("keydown", keyPressed);
             $(".strip img").on("load", thumbnailLoaded);
+            $('img').on('dragstart', function(event) { event.preventDefault(); });
 
             render();
         }

@@ -1,15 +1,15 @@
 cgallery
 =========
 
-cgallery is a very simple photo gallery management system. it only uses two (2) php (yes, php) files.
+cgallery is a simple photo management system. it only uses two php files with no dependencies other than  CDN-hosted versions of jQuery and spin.js.
 
 ```sh
 git clone git@bitbucket.org:clangen/cgallery.git
 ```
 
 ### gallery.php:
-- index page for a single gallery, to be dropped into a directory of images 
-- automatically creates thumbnails and generates layout
+- index for a single gallery -- a directory of images 
+- automatically creates thumbnails
 
 ```sh
 mkdir my_gallery_2013-09
@@ -30,3 +30,16 @@ php ~/cgallery/gallery.php > index.html
 mkdir galleries
 ln -s ~/cgallery/gallery_list.php index.php
 ```
+
+### faq:
+
+> why does this even exist?
+
+practice. i like messing around with photos and just wanted a simple, directory-based management system. 
+<br/><br/>
+
+> why php, and not something awesome like ruby/go/node/etc?
+
+*sigh*. php is easy and it runs everywhere. it's also only used for thumbnail creation, so feel free to swap out the backend with anything you want.
+<br/>
+
