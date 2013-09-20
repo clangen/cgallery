@@ -9,99 +9,88 @@
     */
     header("Content-Type: text/html; charset=utf-8");
 
-    function getOutputPath() {
-        return (getcwd() . "/.thumbs/");
-    }
-
-    function getOutputFilenameFor($filename) {
-        return getOutputPath() . end(explode("/", $filename));
-    }
-
-    function getImageList() {
+    function listImages() {
         $dir = opendir(".");
-        $images = array();
-        while (($file = readdir($dir)) !== false) {
-            $tail = strtolower(substr($file, strlen($file) - 3, 3));
+        $result = array();
 
-            if (is_file($file)) {
-                if (strcmp($tail, "jpg") == 0
-                    || strcmp($tail, "gif") == 0
-                    || strcmp($tail, "png") == 0)
-                {
-                    array_push($images, $file);
-                }
+        while (($fn = readdir($dir)) !== false) {
+            if (($fn === ".") || ($fn === "..") || !is_file($fn)) {
+                continue;
+            }
+
+            $extension = strtolower(substr($fn, strlen($fn) - 3, 3));
+
+            if (strcmp($extension, "jpg") == 0
+                || strcmp($extension, "gif") == 0
+                || strcmp($extension, "png") == 0)
+            {
+                array_push($result, $fn);
             }
         }
 
-        sort($images);
-        return $images;
+        sort($result);
+        return $result;
     }
 
-    function createImage($filename, $format) {
-        if ($format == "png") {
-            return imagecreatefrompng($filename);
+    function createThumbnail($inFn, $outFn) {
+        $maxHeight = 80;
+        $format = strtolower(end(explode(".", $inFn)));
+
+        /* load the input image and get dimensions */
+        $inImage = null;
+        switch ($format) {
+            case "png": $inImage = imagecreatefrompng($inFn); break;
+            case "jpg": $inImage = imagecreatefromjpeg($inFn); break;
+            case "gif": $inImage = imagecreatefromgif($inFn); break;
+            default: return;
         }
-        else if ($format == "jpg") {
-            return imagecreatefromjpeg($filename);
-        }
-        else if ($format == "gif") {
-            return imagecreatefromgif($filename);
-        }
 
-        return null;
-    }
+        $inWidth = imagesx($inImage);
+        $inHeight = imagesy($inImage);
+        $ratio = $inWidth / $inHeight;
 
-    function generateThumbFor($filename, $format) {
-        $maxSize = 80;
+        /* calculate output dimensions, create image */
+        $outWidth = floor($maxHeight * $ratio);
+        $outHeight = $maxHeight;
+        $outImage = imagecreatetruecolor($outWidth, $outHeight);
 
-        $imageOrig = createImage($filename, $format);
-        $origWidth = imagesx($imageOrig);
-        $origHeight = imagesy($imageOrig);
-        $ratio = $origWidth / $origHeight;
-
-        $imageWidth = floor($maxSize * $ratio);
-        $imageHeight = floor($maxSize);
-
-        $thumb = imagecreatetruecolor($imageWidth, $imageHeight);
-
+        /* generate the thumbnail into $outImage */
         $result = imagecopyresampled(
-          $thumb, $imageOrig, 0, 0, 0, 0,
-          $imageWidth, $imageHeight, $origWidth, $origHeight);
+          $outImage,
+          $inImage,
+          0, 0, 0, 0,
+          $outWidth, $outHeight,
+          $inWidth, $inHeight
+        );
 
+        /* write to disk, clean up */
         if ($result) {
-            imagepng($thumb, getOutputFilenameFor($filename));
+            imagepng($outImage, $outFn);
         }
 
-        imagedestroy($imageOrig);
-        imagedestroy($thumb);
+        imagedestroy($inImage);
+        imagedestroy($outImage);
     }
 
-    function generateThumbs($imageList) {
-        $imagePath = getcwd() . "/";
-        $path = getOutputPath();
+    function createThumbnails($imageList) {
+        $outPath = (getcwd() . "/.thumbs/");
+        $inPath = (getcwd() . "/");
 
-        @mkdir($path);
+        @mkdir($outPath);
 
-        foreach ($imageList as $current) {
-            if (($current === ".") || ($current === "..")) {
-                continue;
+        foreach ($imageList as $imageFn) {
+            $outFn = $outPath . $imageFn;
+            if (file_exists($outFn)) {
+                continue; /* thumbnail exists */
             }
 
-            $current = $imagePath . $current;
-
-            if (file_exists(getOutputFilenameFor($current))) {
-                continue;
-            }
-
-            $extension = strtolower(end(explode(".", $current)));
-            if (($extension == "jpg") || ($extension == "png") || ($extension == "gif")) {
-                generateThumbFor($current, $extension);
-            }
+            $inFn = $inPath . $imageFn;
+            createThumbnail($inFn, $outFn);
         }
     }
 
-    $imageList = getImageList();
-    generateThumbs($imageList);
+    $imageList = listImages();
+    createThumbnails($imageList);
 ?>
 <html>
 <head>

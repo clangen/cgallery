@@ -1,31 +1,23 @@
 <?php
   header("Content-Type: text/html; charset=utf-8");
 
-  function getOutputPath() {
-    return (getcwd() . "/.thumbs/");
-  }
-
-  function getOutputFilenameFor($filename) {
-    return getOutputPath() . end(explode("/", $filename));
-  }
-
-  function getGalleryList() {
+  function listGalleries() {
     $dir = opendir(".");
-    $galleries = array();
+    $result = array();
 
     while (($file = readdir($dir)) !== false) {
       if ($file != "." && $file != ".." && is_dir($file)) {
           if (!is_file($file . "/.hidden")) {
-            array_push($galleries, $file);
+            array_push($result, $file);
           }
       }
     }
 
-    sort($galleries);
-    return $galleries;
+    sort($result);
+    return $result;
   }
 
-  $galleryList = getGalleryList();
+  $galleries = listGalleries();
 ?>
 
 <html>
@@ -191,8 +183,8 @@
 
     var GALLERIES = [
       <?php
-        global $galleryList; /* generated above */
-        foreach ($galleryList as $gallery) {
+        global $galleries; /* generated above */
+        foreach ($galleries as $gallery) {
           printf('"' . $gallery . '",' . "\n");
         }
       ?>
