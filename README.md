@@ -36,10 +36,8 @@ ln -s ~/cgallery/gallery_list.php index.php
 > why does this even exist?
 
 practice. i like messing around with photos and just wanted a simple, directory-based management system. 
-<br/><br/>
 
 > why php, and not something awesome like ruby/go/node/etc?
 
 *sigh*. php is easy and it runs everywhere. it's also only used for thumbnail creation, so feel free to swap out the backend with anything you want.
-<br/>
 
