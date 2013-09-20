@@ -165,6 +165,7 @@
 <script type="text/javascript">
     /* YYYY-MM-DD or YYYY-MM */
     var SIMPLE_DATE_REGEX = /^\d{4}-\d{2}(-\d{2})?$/;
+    var BACKGROUND_COLOR_REGEX = /.*#.*(b:rgb\(.*\)).*/;
 
     var LIST_ITEM_TEMPLATE =
       '<li class="item gallery-name">' +
@@ -206,6 +207,32 @@
       return "#" + (window.location.href.split("#")[1] || "");
     }
 
+    function getBackgroundColor(options) {
+      options = options || { };
+      options.format = options.format || 'hash';
+
+      hash = options.hash || getHashFromUrl();
+      var result = '';
+      var match = hash.match(BACKGROUND_COLOR_REGEX);
+
+      if (match && match.length >= 2) {
+        result = match[1];
+
+        if (options.format === 'css') {
+          return decodeURIComponent(result.split(':')[1]);
+        }
+      }
+
+      return result;
+    }
+
+    function updateBackgroundColor() {
+      var color = getBackgroundColor({format: 'css'});
+      if (color.length) {
+        $('.main').css('background-color', color);
+      }
+    }
+
     function parseListItem(caption) {
       parts = (caption || "").split(" ");
       var len = parts.length;
@@ -219,15 +246,12 @@
       return { date: date, caption: caption }
     }
 
-    function urlAtIndex(index, hash) {
+    function urlAtIndex(index) {
       var result =
         window.location.protocol + '//' +
         window.location.hostname + '/' +
-        'photos/' + GALLERIES[index];
-
-      if (hash) {
-        result += ("#" + hash);
-      }
+        'photos/' + GALLERIES[index] +
+        "#" + getBackgroundColor();
 
       return result;
     }
@@ -237,6 +261,7 @@
       var data = event.data;
       if (data && data.message === 'hashChanged' && currentGallery) {
         writeHash(currentGallery + "/" + data.options.hash);
+        updateBackgroundColor();
       }
     });
 
