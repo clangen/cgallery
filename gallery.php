@@ -394,11 +394,15 @@
         if (embedded) {
             $(window).on('message', function(event) {
               event = event.originalEvent || event;
-              var data = event.data;
-              if (data && data.message === 'changeHash') {
-                if (data.options.hash !== getHashFromUrl().substring(1)) {
-                  render(parseHash(data.options.hash));
-                }
+              var data = event.data || { };
+              switch (data.message) {
+                case 'changeHash':
+                    if (data.options.hash !== getHashFromUrl().substring(1)) {
+                      render(parseHash(data.options.hash));
+                    }
+                    break;
+                case 'next': moveBy(1); break;
+                case 'prev': moveBy(-1); break;
               }
             });
         }

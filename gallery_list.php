@@ -270,6 +270,14 @@
         var hashPollInterval;
         var currentHashPath;
 
+        var post = function(name, options) {
+            var el = $iframe.get(0);
+            if (el && el.contentWindow && el.contentWindow.postMessage) {
+              var msg  = { message: name, options: options || { } };
+              el.contentWindow.postMessage(msg, "*");
+            }
+        };
+
         var select = function(index) {
           if (typeof index === 'string') {
             if (index.charAt(0) === '#') {
@@ -288,16 +296,8 @@
             var lastHashPath = (lastHash || "").split("/")[1];
             if (lastHashPath !== currentHashPath) {
               /* gallery is the same, but the image changed. user probably pressed
-              the back button */
-              var el = $iframe.get(0);
-              if (el && el.contentWindow && el.contentWindow.postMessage) {
-                var msg  = {
-                  message: 'changeHash',
-                  options: { hash: currentHashPath }
-                };
-
-                el.contentWindow.postMessage(msg, "*");
-              }
+              the back button, so let the current gallery know */
+              post('changeHash', {hash: currentHashPath});
             }
           }
           else {
@@ -357,6 +357,17 @@
           var $el = $(event.currentTarget);
           var index = parseInt($el.attr("data-index"), 10);
           select(index);
+        });
+
+        $("body").on("keydown", function(event) {
+            if (event.altKey || event.metaKey) {
+                return true; /* don't swallow browser back/forward shortcuts */
+            }
+
+            switch (event.keyCode) {
+              case 39: post('next'); break;
+              case 37: post('prev'); break;
+            }
         });
 
         /* generate gallery list, add to DOM */
