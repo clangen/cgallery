@@ -27,6 +27,16 @@
 <title>galleries</title>
 
 <style type="text/css">
+    body > * {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      cursor: default;
+    }
+
     body {
       font-family: sans-serif;
       background-color: rgb(46, 46, 46);
@@ -340,6 +350,26 @@
           }
         };
 
+        var getSelectedIndex = function() {
+          var $el = $('.gallery-list .active a');
+
+          if ($el.length === 1) {
+            return parseInt($el.eq(0).attr("data-index"), 10);
+          }
+
+          return 0;
+        };
+
+        var selectNextGallery = function() {
+          var next = getSelectedIndex() + 1;
+          select(next >= GALLERIES.length ? 0 : next);
+        };
+
+        var selectPrevGallery = function() {
+          var prev = getSelectedIndex() - 1;
+          select(prev < 0 ? GALLERIES.length - 1 : prev);
+        };
+
         var scrollToSelectedGallery = function() {
           var $active = $('li.item.active');
           if ($active.length) {
@@ -365,8 +395,10 @@
             }
 
             switch (event.keyCode) {
-              case 39: post('next'); break;
               case 37: post('prev'); break;
+              case 38: selectPrevGallery(); break;
+              case 39: post('next'); break;
+              case 40: selectNextGallery(); break;
             }
         });
 

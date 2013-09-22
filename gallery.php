@@ -95,13 +95,14 @@
 <html>
 <head>
 <style>
-    html {
+    body > * {
         -webkit-touch-callout: none;
         -webkit-user-select: none;
         -khtml-user-select: none;
-        -moz-user-select: moz-none;
+        -moz-user-select: none;
         -ms-user-select: none;
         user-select: none;
+        cursor: default;
     }
 
     ::-moz-selection {
