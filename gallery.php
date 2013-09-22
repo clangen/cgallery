@@ -678,11 +678,18 @@
                 /* don't swallow browser back/forward shortcuts */
                 return true;
             }
+
             if (event.keyCode === 39) { /* right arrow */
                 moveBy(1);
             }
             else if (event.keyCode === 37) { /*left arrow */
                 moveBy(-1);
+            }
+            else if (embedded && event.keyCode === 38) { /* up */
+                window.parent.postMessage({ message: 'prevGallery' }, "*");
+            }
+            else if (embedded && event.keyCode === 40) { /* down */
+                window.parent.postMessage({ message: 'nextGallery' }, "*");
             }
         }
 

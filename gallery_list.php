@@ -175,7 +175,6 @@
 <script type="text/javascript">
     /* YYYY-MM-DD or YYYY-MM */
     var SIMPLE_DATE_REGEX = /^\d{4}-\d{2}(-\d{2})?$/;
-    var BACKGROUND_COLOR_REGEX = /.*#.*(b:rgb\(.*\)).*/;
 
     var LIST_ITEM_TEMPLATE =
       '<li class="item gallery-name">' +
@@ -201,6 +200,7 @@
       ?>
     ];
 
+    var lastSelected = { }; /* key=gallery, value=image */
     var currentGallery = '';
     var lastHash;
 
@@ -217,23 +217,51 @@
       return "#" + (window.location.href.split("#")[1] || "");
     }
 
-    function getBackgroundColor(options) {
-      options = options || { };
-      options.format = options.format || 'hash';
+    function parseGalleryHash(hash) {
+      /* note this same method lives in gallery.php. it wouldn't be a big
+      deal to exteranlize this in a .js file, but then that file would need
+      to be distributed as well. to make this slightly less ugly from the
+      user's standpoint we could use php to dynamically insert this (and
+      other potentially shared functionality) into the pages as they are
+      rendered. but for now we live with this duplicated method. */
+      var result = { };
+      hash = hash || getHashFromUrl();
 
-      hash = options.hash || getHashFromUrl();
-      var result = '';
-      var match = hash.match(BACKGROUND_COLOR_REGEX);
+      if (hash) {
+        if (hash.charAt(0) === '#') {
+          hash = hash.substring(1);
+        }
 
-      if (match && match.length >= 2) {
-        result = match[1];
-
-        if (options.format === 'css') {
-          return decodeURIComponent(result.split(':')[1]);
+        var parts = hash.split("+");
+        for (var i = 0; i < parts.length; i++) {
+          var keyValue = parts[i].split(":");
+          if (keyValue.length === 1) {
+            result.i = decodeURIComponent(keyValue[0]);
+          }
+          if (keyValue.length === 2) {
+            result[keyValue[0]] = decodeURIComponent(keyValue[1]);
+          }
         }
       }
 
       return result;
+    }
+
+    function getBackgroundColor(options) {
+      options = options || { };
+      options.format = options.format || 'hash';
+      var parts = parseGalleryHash(options.hash);
+
+      if (parts.b) {
+        if (options.format === 'css') {
+          return parts.b;
+        }
+        else {
+          return 'b:' + encodeURIComponent(parts.b);
+        }
+      }
+
+      return '';
     }
 
     function updateBackgroundColor() {
@@ -257,28 +285,58 @@
     }
 
     function urlAtIndex(index) {
+      var gallery = GALLERIES[index];
+      var selected = getSelectedImageForGallery(gallery);
+
+      if (selected) {
+        selected = lastSelected[gallery] + '+';
+      }
+
       var result =
         window.location.protocol + '//' +
         window.location.hostname + '/' +
-        'photos/' + GALLERIES[index] +
-        "#" + getBackgroundColor();
+        'photos/' + gallery +
+        "#" + selected + getBackgroundColor();
 
       return result;
     }
 
-    $(window).on('message', function(event) {
-      event = event.originalEvent || event;
-      var data = event.data;
-      if (data && data.message === 'hashChanged' && currentGallery) {
-        writeHash(currentGallery + "/" + data.options.hash);
-        updateBackgroundColor();
+    function setSelectedImageForGallery(gallery, hash) {
+      var parts = parseGalleryHash(hash);
+      if (parts.i && sessionStorage) {
+        lastSelected[gallery] = parts.i;
       }
-    });
+    }
+
+    function getSelectedImageForGallery(gallery) {
+      return lastSelected[gallery] || '';
+    }
 
     $(document).ready(function() {
         var $iframe = $('.embedded');
         var hashPollInterval;
         var currentHashPath;
+
+        $(window).on('message', function(event) {
+          event = event.originalEvent || event;
+
+          var data = event.data;
+          if (data) {
+            switch (data.message) {
+              case 'hashChanged':
+                if (currentGallery) {
+                  var hash = data.options.hash;
+                  writeHash(currentGallery + "/" + hash);
+                  setSelectedImageForGallery(currentGallery, hash);
+                  updateBackgroundColor();
+                }
+                break;
+
+              case 'prevGallery': selectPrevGallery(); break;
+              case 'nextGallery': selectNextGallery(); break;
+            }
+          }
+        });
 
         var post = function(name, options) {
             var el = $iframe.get(0);
@@ -318,7 +376,7 @@
 
             /* load */
             $iframe.addClass('hidden');
-            $iframe.attr("src", urlAtIndex(index, currentHashPath));
+            $iframe.attr("src", urlAtIndex(index));
 
             /* avoid white flash by hiding the iframe for a short
             period of time */
