@@ -294,8 +294,9 @@
     }
 
     ::-webkit-scrollbar {
-        height: 10px;
-        width: 12px;
+        height: 14px;
+        width: 14px;
+        border-radius: 8px;
         background: transparent;
         margin-bottom: 4px;
     }
@@ -303,6 +304,7 @@
     ::-webkit-scrollbar-thumb {
         background: #666;
         border: 1px solid #111;
+        border-radius: 6px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
@@ -311,6 +313,11 @@
 
     ::-webkit-scrollbar-corner {
         background: #000;
+    }
+
+    ::-webkit-scrollbar-track-piece {
+        border-top: 1px solid black;
+        background-color: rgba(0, 0, 0, 0.2);
     }
 
 </style>

@@ -164,24 +164,30 @@
     }
 
     ::-webkit-scrollbar {
-      height: 10px;
-      width: 12px;
-      background: transparent;
-      margin-bottom: 4px;
+        height: 14px;
+        width: 14px;
+        border-radius: 8px;
+        background: transparent;
+        margin-bottom: 4px;
     }
 
     ::-webkit-scrollbar-thumb {
-      background: #666;
-      -webkit-border-radius: 0;
-      border: 1px solid #111;
+        background: #666;
+        border: 1px solid #111;
+        border-radius: 6px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-      background: #bbb;
+        background: #bbb;
     }
 
     ::-webkit-scrollbar-corner {
-      background: #000;
+        background: #000;
+    }
+
+    ::-webkit-scrollbar-track-piece {
+        border-top: 1px solid black;
+        background-color: rgba(0, 0, 0, 0.2);
     }
 </style>
 
