@@ -351,6 +351,7 @@
         var $main = $('.main');
         var $spinnerContainer = $('.spinner-container');
         var spinner = new Spinner(SPINNER_OPTIONS);
+        var galleryLoading = false;
 
         var hashPollInterval;
 
@@ -385,11 +386,18 @@
 
         var setLoading = function(loading) {
           loading = (loading === undefined) ? true : loading;
+
+          if (loading === galleryLoading) {
+            return;
+          }
+
           if (loading) {
+            galleryLoading = true;
             $main.addClass('loading');
             spinner.spin($spinnerContainer[0]);
           }
           else {
+            galleryLoading = false;
             $main.removeClass('loading');
             spinner.stop();
           }
