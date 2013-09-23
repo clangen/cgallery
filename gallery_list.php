@@ -284,12 +284,25 @@
       return { date: date, caption: caption }
     }
 
-    function urlAtIndex(index) {
+    function urlAtIndex(index, hash) {
       var gallery = GALLERIES[index];
-      var selected = getSelectedImageForGallery(gallery);
+      var selected = "";
+
+      if (hash) {
+        /* first try to grab the URL from the hash, if it exists.
+        this has highest priority */
+        selected = parseGalleryHash(hash).i;
+      }
+
+      /* couldn't parse an image from the specified hash, see if
+      we've viewed this gallery before. if we have, the last viewed
+      image will be cached, so we'll load that */
+      if (!selected) {
+        selected = getSelectedImageForGallery(gallery);
+      }
 
       if (selected) {
-        selected = lastSelected[gallery] + '+';
+        selected = selected + '+';
       }
 
       var result =
@@ -315,7 +328,6 @@
     $(document).ready(function() {
         var $iframe = $('.embedded');
         var hashPollInterval;
-        var currentHashPath;
 
         $(window).on('message', function(event) {
           event = event.originalEvent || event;
@@ -347,6 +359,8 @@
         };
 
         var select = function(index) {
+          var currentHashPath; /* only set if index is typeof string */
+
           if (typeof index === 'string') {
             if (index.charAt(0) === '#') {
               index = index.substring(1);
@@ -376,7 +390,7 @@
 
             /* load */
             $iframe.addClass('hidden');
-            $iframe.attr("src", urlAtIndex(index));
+            $iframe.attr("src", urlAtIndex(index, currentHashPath));
 
             /* avoid white flash by hiding the iframe for a short
             period of time */
