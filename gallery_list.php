@@ -144,8 +144,23 @@
       border: 0;
     }
 
-    .embedded.hidden {
+    .loading .embedded {
       visibility: hidden;
+    }
+
+    .spinner-container {
+        display: none;
+        position: absolute;
+        width: 64px;
+        height: 64px;
+        top: 50%;
+        left: 50%;
+        margin-top: -32px; /* height / 2 */
+        margin-left: -32px; /* width / 2 */
+    }
+
+    .loading .spinner-container {
+      display: block;
     }
 
     ::-webkit-scrollbar {
@@ -171,6 +186,7 @@
 </style>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/spin.js/1.2.7/spin.min.js"></script>
 
 <script type="text/javascript">
     /* YYYY-MM-DD or YYYY-MM */
@@ -190,6 +206,11 @@
         '</a>' +
         '<span class="date"> ({{date}})</span>' +
       '</li>';
+
+    var SPINNER_OPTIONS = {
+      lines: 12, length: 7, width: 4, radius: 10, color: '#ffffff',
+      speed: 1, trail: 60, shadow: true
+    };
 
     var GALLERIES = [
       <?php
@@ -327,6 +348,10 @@
 
     $(document).ready(function() {
         var $iframe = $('.embedded');
+        var $main = $('.main');
+        var $spinnerContainer = $('.spinner-container');
+        var spinner = new Spinner(SPINNER_OPTIONS);
+
         var hashPollInterval;
 
         $(window).on('message', function(event) {
@@ -356,6 +381,18 @@
               var msg  = { message: name, options: options || { } };
               el.contentWindow.postMessage(msg, "*");
             }
+        };
+
+        var setLoading = function(loading) {
+          loading = (loading === undefined) ? true : loading;
+          if (loading) {
+            $main.addClass('loading');
+            spinner.spin($spinnerContainer[0]);
+          }
+          else {
+            $main.removeClass('loading');
+            spinner.stop();
+          }
         };
 
         var select = function(index) {
@@ -389,13 +426,16 @@
             $items.eq(index).addClass('active');
 
             /* load */
-            $iframe.addClass('hidden');
+            setLoading(true);
             $iframe.attr("src", urlAtIndex(index, currentHashPath));
 
             /* avoid white flash by hiding the iframe for a short
             period of time */
+            $iframe.one('load', function() {
+              setLoading(false);
+            });
+
             setTimeout(function() {
-              $iframe.removeClass('hidden');
             }, 500);
 
             currentGallery = GALLERIES[index];
@@ -509,8 +549,9 @@
     <div class="title">albums:</div>
     <ul class="gallery-list"></ul>
   </div>
-  <div class="main">
-    <iframe class="embedded hidden"></iframe>
+  <div class="main loading">
+    <iframe class="embedded"></iframe>
+    <div class="spinner-container"></div>
   </div>
   <div class="footer">
     <a href="https://bitbucket.org/clangen/cgallery" target="_new">https://bitbucket.org/clangen/cgallery</a>
