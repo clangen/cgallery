@@ -164,8 +164,8 @@
     }
 
     ::-webkit-scrollbar {
-        height: 14px;
-        width: 14px;
+        height: 9px;
+        width: 9px;
         border-radius: 8px;
         background: transparent;
         margin-bottom: 4px;

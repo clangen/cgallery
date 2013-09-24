@@ -161,7 +161,7 @@
         bottom: 0;
         left: 0;
         right: 0;
-        height: 96px;
+        height: 98px;
         overflow-x: auto;
         overflow-y: hidden;
         background-color: #222;
@@ -294,8 +294,8 @@
     }
 
     ::-webkit-scrollbar {
-        height: 14px;
-        width: 14px;
+        height: 9px;
+        width: 9px;
         border-radius: 8px;
         background: transparent;
         margin-bottom: 4px;
@@ -526,9 +526,9 @@
             var sb = $strip[0].scrollWidth > $strip[0].clientWidth;
 
             if (sb !== hasScrollbar) {
-                var height = BASE_STRIP_HEIGHT + (sb ? scrollbarSize : 0) + 4;
-                $footer.css("height", height + SCROLLBAR_HEIGHT_FUDGE);
-                $middle.css("bottom", height + SCROLLBAR_HEIGHT_FUDGE);
+                var height = BASE_STRIP_HEIGHT + (sb ? scrollbarSize : 0);
+                $footer.css("height", height);
+                $middle.css("bottom", height);
                 hasScrollbar = sb;
             }
         }
