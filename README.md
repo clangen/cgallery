@@ -1,7 +1,7 @@
 cgallery
 =========
 
-cgallery is a simple photo management system. it consists of 2 php files, and uses CDN versions of query and spin.js.
+cgallery is a simple photo management system. it consists of 2 php files, and uses CDN versions of jquery and spin.js.
 
 ```sh
 git clone git@bitbucket.org:clangen/cgallery.git
