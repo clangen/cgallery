@@ -334,8 +334,8 @@
 
       var result =
         window.location.protocol + '//' +
-        window.location.hostname + '/' +
-        'photos/' + gallery +
+        window.location.hostname +
+        window.location.pathname + gallery +
         "#" + selected + getBackgroundColor();
 
       return result;
