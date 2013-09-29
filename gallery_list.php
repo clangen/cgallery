@@ -2,14 +2,21 @@
   header("Content-Type: text/html; charset=utf-8");
 
   function listGalleries() {
+    $cwd = dirname($_SERVER['SCRIPT_FILENAME']);
+    $cwd = array_pop(explode('/', $cwd));
+
     $dir = opendir(".");
     $result = array();
 
     while (($file = readdir($dir)) !== false) {
       if ($file != "." && $file != ".." && is_dir($file)) {
-          if (!is_file($file . "/.hidden")) {
-            array_push($result, $file);
+          $hidden = $file . "/.hidden";
+
+          if (is_file($hidden) || is_file($hidden . "-" . $cwd)) {
+            continue;
           }
+
+          array_push($result, $file);
       }
     }
 
