@@ -1,26 +1,25 @@
 cgallery
 =========
-
 a simple photo management system.
 
-cgallery requires:
-- a **web server** with **php** and the **gd** image library
+####cgallery requires:
+* a **web server** with **php** and the **gd** image library
 
 ```sh
 git clone git@bitbucket.org:clangen/cgallery.git
 ```
 
-cgallery consists of:
-- two php files:
+####cgallery consists of:
+* two php files:
     * **gallery.php**
     * **gallery_list.php**
-- cdn versions of:
+* cdn versions of:
     * **jquery**
     * **spin.js**
 
 ### gallery.php:
-- indexes a single gallery (defined by a directory of images)
-- uses php to scan directory and generate thumbnails -- optionally on the fly
+* indexes a single gallery (defined by a directory of images)
+* uses php to scan directory and generate thumbnails -- optionally on the fly
 
 here's an example. let's say you have a directory full of images called *my_gallery_2013-09*
 ```sh
@@ -36,7 +35,7 @@ php ~/cgallery/gallery.php > index.html
 ```
 
 ### gallery_list.php:
-- indexes a collection of individual galleries (e.g. family photos)
+* indexes a collection of individual galleries (e.g. family photos)
 
 ```sh
 mkdir galleries
