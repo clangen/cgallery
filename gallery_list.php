@@ -49,6 +49,10 @@
       background-color: rgb(46, 46, 46);
     }
 
+    a {
+      outline: 0;
+    }
+
     .main {
       position: absolute;
       left: 210px;
