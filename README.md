@@ -50,7 +50,7 @@ i like messing around with photos and just wanted a simple, directory-based mana
 
 > which browsers are supported?
 
-current versions of chrome, firefox, and internet explorer are fully supported. older versions of chrome and firefox should also work fine.
+all major browser revisions less than a year or two old should work fine. current versions of chrome, safari, firefox, and internet explorer are tested regularly and should be fully supported.
 
 > why use cgallery instead of [my current image hosting service]?
 
