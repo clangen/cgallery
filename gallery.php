@@ -468,10 +468,11 @@
             var image = options.image || $image.attr("src");
             var background = options.background || $("body").css("background-color");
 
-            var result =
-                "#" +
-                encodeURIComponent(image) + "+b:" +
-                encodeURIComponent(background.replace(/, /g, ","));
+            var result = "#" + encodeURIComponent(image);
+
+            if (background) {
+                result += "+b:" + encodeURIComponent(background.replace(/, /g, ","));
+            }
 
             return result;
         }
@@ -677,7 +678,7 @@
                 setImage(image);
                 writeHash({image: image});
                 pollHash();
-            });
+            }, 250);
         }
 
         function keyPressed(event) {

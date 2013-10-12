@@ -1,30 +1,34 @@
 <?php
   header("Content-Type: text/html; charset=utf-8");
 
-  function listGalleries() {
-    $cwd = dirname($_SERVER['SCRIPT_FILENAME']);
-    $cwd = array_pop(explode('/', $cwd));
+  $galleries = array();
+  $sets = array();
 
-    $dir = opendir(".");
-    $result = array();
+  $cwd = dirname($_SERVER['SCRIPT_FILENAME']);
+  $cwd = array_pop(explode('/', $cwd));
 
-    while (($file = readdir($dir)) !== false) {
-      if ($file != "." && $file != ".." && is_dir($file)) {
-          $hidden = $file . "/.hidden";
+  $dir = opendir(".");
+  $result = array();
 
-          if (is_file($hidden) || is_file($hidden . "-" . $cwd)) {
-            continue;
-          }
+  while (($file = readdir($dir)) !== false) {
+    if ($file != "." && $file != ".." && is_dir($file)) {
+        $hidden = $file . "/.hidden";
 
-          array_push($result, $file);
-      }
+        if (is_file($hidden) || is_file($hidden . "-" . $cwd)) {
+          continue;
+        }
+
+        if (is_file($file . "/.set")) {
+          array_push($sets, $file);
+        }
+        else {
+          array_push($galleries, $file);
+        }
     }
-
-    sort($result);
-    return $result;
   }
 
-  $galleries = listGalleries();
+  sort($galleries);
+  sort($sets);
 ?>
 
 <html>
@@ -72,6 +76,9 @@
       top: 20px;
       bottom: 20px;
       width: 180px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     ul, li {
@@ -107,7 +114,15 @@
       color: #666;
       text-shadow: 0 0 8px #222;
       text-decoration: underline;
-      padding-bottom: 8px;
+      padding-bottom: 4px;
+    }
+
+    .galleries {
+      display: block;
+    }
+
+    .hidden {
+      display: none;
     }
 
     .date {
@@ -115,15 +130,8 @@
       color: #666;
     }
 
-    .gallery-list {
-      position: absolute;
-      top: 40px;
-      bottom: 20px;
-      left: 0;
-      right: 0;
-      overflow-x: hidden;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
+    .gallery-list,
+    .set-list {
       padding-left: 0px;
     }
 
@@ -239,15 +247,56 @@
       ?>
     ];
 
+    var SETS = [
+      <?php
+        global $sets; /* generated above */
+        foreach ($sets as $set) {
+          printf('"' . $set . '",' . "\n");
+        }
+      ?>
+    ];
+
     var lastSelected = { }; /* key=gallery, value=image */
     var currentGallery = '';
     var lastHash;
 
-    function writeHash(hash) {
+    function writeHash(hash, options) {
+      options = options || { };
+
+      console.log(hash);
+
+      /* if the hash doesn't contain a specific image, for example it
+      looks like this: 'foo.com/photos/#gallery, and the new url has
+      an image, e.g. foo.com/photos/#gallery/test.png then replace the
+      existing url. this is a bit of a hack to keep the backstack clean. */
+      var currentHash = getHashFromUrl().split('/');
+
+      if (currentHash.length === 1) {
+        currentHash[0] = currentHash[0].substring(1); /* remove # */
+        /* if there is no hash then we just loaded -- we also replace the
+        url in this state so to the user the first url appears to be
+        the first selected gallery */
+        if (currentHash[0] === '' || currentHash[0] === hash.split('/')[0]) {
+          options.replace = true;
+        }
+      }
+
       lastHash = "#" + hash;
 
       if (hash !== window.location.hash) {
-        window.location.hash = hash;
+        if (options && options.replace) {
+          if (window.history.replaceState) {
+            window.history.replaceState({ }, document.title, '#' + hash);
+          }
+          else {
+            /* stolen from backbone */
+            var href = location.href.replace(/(javascript:|#).*$/, '');
+            location.replace(href + '#' + hash);
+          }
+        }
+        else {
+          window.location.hash = hash;
+        }
       }
     }
 
@@ -421,6 +470,17 @@
           }
         };
 
+        /* if we don't destroy then re-create the iframe every time the gallery
+        switches, its history gets updated and corrupts our backstack */
+        resetIFrame = function(url) {
+          if ($iframe) {
+            $iframe.remove();
+          }
+
+          $iframe = $('<iframe src="' + url + '" class="embedded foo"></iframe>');
+          $('.main').append($iframe);
+        };
+
         var select = function(index) {
           var currentHashPath; /* only set if index is typeof string */
 
@@ -453,7 +513,7 @@
 
             /* load */
             setLoading(true);
-            $iframe.attr("src", urlAtIndex(index, currentHashPath));
+            resetIFrame(urlAtIndex(index, currentHashPath));
 
             /* avoid white flash by hiding the iframe for a short
             period of time */
@@ -540,10 +600,12 @@
             }
         });
 
+        var i;
+
         /* generate gallery list, add to DOM */
-        var $list = $(".gallery-list");
+        var $galleryList = $(".gallery-list");
         var gallery, caption, parts, template, html;
-        for (var i = 0; i < GALLERIES.length; i++) {
+        for (i = 0; i < GALLERIES.length; i++) {
             gallery = GALLERIES[i];
 
             caption = gallery.replace(/_/g, " ");
@@ -558,8 +620,22 @@
                 .replace("{{index}}", i)
                 .replace("{{date}}", parts.date);
 
-            $list.append(html);
+            $galleryList.append(html);
         }
+
+        /* generate set list */
+        var $setList = $(".set-list"), set;
+        for (i = 0; i < SETS.length; i++) {
+            html = LIST_ITEM_TEMPLATE
+                .replace("{{url}}", SETS[i])
+                .replace("{{caption}}", SETS[i].replace(/_/g, " "))
+                .replace("{{index}}", i);
+
+            $setList.append(html);
+        }
+
+        $('.galleries').toggleClass('hidden', GALLERIES.length === 0);
+        $('.sets').toggleClass('hidden', SETS.length === 0);
 
         select(getHashFromUrl());
         scrollToSelectedGallery();
@@ -572,16 +648,22 @@
 
 <body onselectstart="return false">
   <div class="left">
-    <div class="title">albums:</div>
-    <ul class="gallery-list"></ul>
+    <div class="galleries">
+      <div class="title">albums:</div>
+      <ul class="gallery-list"></ul>
+    </div>
+    <div class="sets hidden">
+      <div class="title">sets:</div>
+      <ul class="set-list"></ul>
+    </div>
   </div>
   <div class="main loading">
-    <iframe class="embedded"></iframe>
+    <!-- iframe inserted dynamically -->
     <div class="spinner-container"></div>
   </div>
   <div class="footer">
     <a href="https://bitbucket.org/clangen/cgallery" target="_new">https://bitbucket.org/clangen/cgallery</a>
   </div>
-
 </body>
+
 </html>
