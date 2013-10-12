@@ -263,8 +263,6 @@
     function writeHash(hash, options) {
       options = options || { };
 
-      console.log(hash);
-
       /* if the hash doesn't contain a specific image, for example it
       looks like this: 'foo.com/photos/#gallery, and the new url has
       an image, e.g. foo.com/photos/#gallery/test.png then replace the
