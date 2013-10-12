@@ -46,7 +46,11 @@ ln -s ~/cgallery/gallery_list.php index.php
 
 > why does exist?
 
-i like messing around with photos and just wanted a simple, directory-based management system. 
+i like messing around with photos and just wanted a simple, directory-based management system.
+
+> which browsers are supported?
+
+current versions of chrome, firefox, and internet explorer are fully supported. older versions of chrome and firefox should also work fine.
 
 > why use cgallery instead of [my current image hosting service]?
 
@@ -58,7 +62,7 @@ there's not a good reason, honestly. image hosting services are generally cheap/
 
 > why are are js and css included in the php files?
 
-this was a conscience decision. although externalizing these resources would be easy, the scripts seem more useful when they are completely self-contained. just drop the php file in a directory and go. the consequence is that, in a couple cases, there is a small amount of code duplicated between gallery.php and gallery_list.php. yes, this makes maintenance slightly more annoying, but it also makes the system easier to use. 
+this was a conscience decision. although externalizing these resources would be easy, the scripts seem more useful when they are completely self-contained. just drop the php file in a directory and go. the consequence is that, in a couple cases, there is a small amount of code duplicated between gallery.php and gallery_list.php. yes, this makes maintenance slightly more annoying, but it also makes the system easier to use.
 
 > why aren't the javascript and css minified?
 
@@ -66,4 +70,4 @@ it introduces (what what i believe to be) unnecessary release overhead for now. 
 
 > i angrily disagree with some of your answers and think you're idiot!
 
-the license allows you to change the implementation as you wish, so feel free!
+the license allows you to change the implementation as you wish, so feel free.

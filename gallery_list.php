@@ -475,7 +475,7 @@
             $iframe.remove();
           }
 
-          $iframe = $('<iframe src="' + url + '" class="embedded foo"></iframe>');
+          $iframe = $('<iframe src="' + url + '" class="embedded"></iframe>');
           $('.main').append($iframe);
         };
 

@@ -526,6 +526,10 @@
         function checkForScrollbar() {
             var sb = $strip[0].scrollWidth > $strip[0].clientWidth;
 
+            if (!scrollbarSize) {
+                scrollbarSize = $.getScrollbarWidth();
+            }
+
             if (sb !== hasScrollbar) {
                 var height = BASE_STRIP_HEIGHT + (sb ? scrollbarSize : 0);
                 $footer.css("height", height);
