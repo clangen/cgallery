@@ -44,13 +44,21 @@ ln -s ~/cgallery/gallery_list.php index.php
 
 ### faq:
 
-> why does exist?
+> why does this even exist?
 
 i like messing around with photos and just wanted a simple, directory-based management system.
 
 > which browsers are supported?
 
 all major browser revisions less than a year or two old should work fine. current versions of chrome, safari, firefox, and internet explorer are tested regularly and should be fully supported.
+
+> there are certain sub-directories i don't want gallery_list.php to index, how can i prevent them from showing up in the left panel?
+
+create an empty file called **.hidden** in the directories you want to exclude.
+
+> i have a sub-directory that contains a gallery_list, not just a simple gallery. is this supported?
+
+yes! just create an empty file called **.set** in this directory, and it will be indexed separately.
 
 > why use cgallery instead of [my current image hosting service]?
 
