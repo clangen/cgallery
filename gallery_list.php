@@ -475,8 +475,18 @@
             $iframe.remove();
           }
 
-          $iframe = $('<iframe src="' + url + '" class="embedded"></iframe>');
+          $iframe = $('<iframe class="embedded"></iframe>');
           $('.main').append($iframe);
+
+          setTimeout(function() {
+            $iframe.attr('src', url);
+
+            /* setting src isn't good enough. in some browsers (older firefox,
+            newer chrome), navigating forward (e.g. to a gallery set), then back
+            will cause the wrong iframe url to be loaded. solution was found:
+            http://stackoverflow.com/questions/2648053/preventing-iframe-caching-in-browser */
+            $iframe[0].contentWindow.location.href = url;
+          });
         };
 
         var select = function(index) {
