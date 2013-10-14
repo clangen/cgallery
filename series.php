@@ -649,7 +649,7 @@
         var $seriesList = $(".series-list"), series;
         for (i = 0; i < SERIES.length; i++) {
             html = LIST_ITEM_SERIES_TEMPLATE
-                .replace("{{url}}", SERIES[i])
+                .replace("{{url}}", SERIES[i] + "?back=1")
                 .replace("{{caption}}", SERIES[i].replace(/_/g, " "))
                 .replace("{{index}}", i);
 

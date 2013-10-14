@@ -11,35 +11,38 @@ git clone git@bitbucket.org:clangen/cgallery.git
 
 ####cgallery consists of:
 * two php files:
-    * **gallery.php**
-    * **gallery_list.php**
+    * **album.php**
+    * **series.php**
 * cdn versions of:
     * **jquery**
     * **spin.js**
 
-### gallery.php:
-* indexes a single gallery (defined by a directory of images)
+### album.php:
+* indexes a single album (defined by a directory of images)
 * uses php to scan directory and generate thumbnails -- optionally on the fly
 
-here's an example. let's say you have a directory full of images called *my_gallery_2013-09*
+here's an example. let's say you have a directory full of images called *my_album_2013-09*
 ```sh
-cd my_gallery_2013-09
-ln -s ~/src/cgallery/gallery.php ./index.php
+cd my_album_2013-09
+ln -s ~/src/cgallery/album.php ./index.php
 ```
-now, every time someone vists http://yoursite.com/my_gallery_2013-09 they'll see a photo gallery instead of a directory listing.
+now, every time someone vists http://yoursite.com/my_album_2013-09 they'll see a photo album instead of a directory listing.
 
-you can (and **should** if you're serving a lot of traffic) use gallery.php to generate static html. using php to scan the filesystem for new thumbnails during every page load is a bad idea.
+you can (and **should** if you're serving a lot of traffic) use album.php to generate static html. using php to scan the filesystem for new thumbnails during every page load is a bad idea.
 
 ```sh
-php ~/cgallery/gallery.php > index.html
+php ~/cgallery/album.php > index.html
 ```
 
-### gallery_list.php:
-* indexes a collection of individual galleries (e.g. family photos)
+### series.php:
+* indexes a collection of individual albums (e.g. family photos)
 
 ```sh
-mkdir galleries
-ln -s ~/cgallery/gallery_list.php index.php
+mkdir family_photos
+ln -s ~/cgallery/series.php index.php
+
+mkdir family_photos/thanksgiving_2011-09
+ln -s ~/cgallery/album.php index.php
 ```
 
 ### faq:
@@ -52,13 +55,13 @@ i like messing around with photos and just wanted a simple, directory-based mana
 
 all major browser revisions less than a year or two old should work fine. current versions of chrome, safari, firefox, and internet explorer are tested regularly and should be fully supported.
 
-> there are certain sub-directories i don't want gallery_list.php to index, how can i prevent them from showing up in the left panel?
+> there are certain sub-directories i don't want series.php to index, how can i prevent them from showing up in the left panel?
 
 create an empty file called **.hidden** in the directories you want to exclude.
 
-> i have a sub-directory that contains a gallery_list, not just a simple gallery. is this supported?
+> i have a sub-directory that contains a series, not just a simple album. is this supported?
 
-yes! just create an empty file called **.set** in this directory, and it will be indexed separately.
+yes! just create an empty file called **.series** in this directory, and it will be indexed separately.
 
 > why use cgallery instead of [my current image hosting service]?
 
@@ -70,7 +73,7 @@ there's not a good reason, honestly. image hosting services are generally cheap/
 
 > why are are js and css included in the php files?
 
-this was a conscience decision. although externalizing these resources would be easy, the scripts seem more useful when they are completely self-contained. just drop the php file in a directory and go. the consequence is that, in a couple cases, there is a small amount of code duplicated between gallery.php and gallery_list.php. yes, this makes maintenance slightly more annoying, but it also makes the system easier to use.
+this was a conscience decision. although externalizing these resources would be easy, the scripts seem more useful when they are completely self-contained. just drop the php file in a directory and go. the consequence is that, in a couple cases, there is a small amount of code duplicated between album.php and series.php. yes, this makes maintenance slightly more annoying, but it also makes the system easier to use.
 
 > why aren't the javascript and css minified?
 
