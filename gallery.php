@@ -1,9 +1,14 @@
 <?php
-    /* cgallery 2.0 beta 1
+    /* cgallery 2.0 rc 2
     *
-    * a minimal gallery script by clangen. works in most major browsers.
-    * just toss this php file in a directory with images and it will
-    * automatically create thumbnails and generate a page layout.
+    * this source unit indexes a single directory of images. it is what
+    * is known as an "album" in cgallery lingo.
+    *
+    * this draws a filmstrip image selection and a fit-to-screen image.
+    * it also has back and forth button, and can handle its own history.
+    * when embedded, it talks to an "album list"
+    *
+    * php is used to autogen thumbnails.
     *
     * uses jquery and spin.js.
     */
@@ -398,6 +403,7 @@
         var currentImage, lastHash;
         var hashPollInterval;
         var embedded = (window.parent !== window);
+        var back;
 
         if (embedded) {
             $(window).on('message', function(event) {
@@ -454,6 +460,9 @@
         }
 
         function pollHash() {
+            /* don't poll the hash when we're embedded -- let the outer container
+            control the url stack. we send events via postMessage elsewhere when
+            the selected image changes. */
             if (!embedded && !hashPollInterval) {
                 hashPollInterval = setInterval(function() {
                     if (getHashFromUrl() !== lastHash) {
@@ -698,19 +707,18 @@
                 moveBy(-1);
             }
             else if (embedded && event.keyCode === 38) { /* up */
-                window.parent.postMessage({ message: 'prevGallery' }, "*");
+                window.parent.postMessage({ message: 'prevAlbum' }, "*");
             }
             else if (embedded && event.keyCode === 40) { /* down */
-                window.parent.postMessage({ message: 'nextGallery' }, "*");
+                window.parent.postMessage({ message: 'nextAlbum' }, "*");
             }
         }
 
         function main() {
             if ($.browser.chrome) {
+                /* unclear why this is necessary, but seems to be a good
+                universal fix across platforms */
                 SCROLLBAR_HEIGHT_FUDGE = -4;
-            }
-            else if ($.browser.firefox) {
-                SCROLLBAR_HEIGHT_FUDGE = 0;
             }
 
             /* initialize the color picker */

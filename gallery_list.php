@@ -1,8 +1,8 @@
 <?php
   header("Content-Type: text/html; charset=utf-8");
 
-  $galleries = array();
-  $sets = array();
+  $albums = array();
+  $series = array();
 
   $cwd = dirname($_SERVER['SCRIPT_FILENAME']);
   $cwd = array_pop(explode('/', $cwd));
@@ -18,24 +18,24 @@
           continue;
         }
 
-        if (is_file($file . "/.set")) {
-          array_push($sets, $file);
+        if (is_file($file . "/.series")) {
+          array_push($series, $file);
         }
         else {
-          array_push($galleries, $file);
+          array_push($albums, $file);
         }
     }
   }
 
-  sort($galleries);
-  sort($sets);
+  sort($albums);
+  sort($series);
 ?>
 
 <html>
 
 <head>
 
-<title>galleries</title>
+<title>albums</title>
 
 <style type="text/css">
     body > * {
@@ -110,14 +110,14 @@
 
     .title {
       font-weight: bold;
-      font-size: 30px;
+      font-size: 24px;
       color: #666;
       text-shadow: 0 0 8px #222;
       text-decoration: underline;
       padding-bottom: 4px;
     }
 
-    .galleries {
+    .albums {
       display: block;
     }
 
@@ -130,8 +130,8 @@
       color: #666;
     }
 
-    .gallery-list,
-    .set-list {
+    .album-list,
+    .series-list {
       padding-left: 0px;
     }
 
@@ -162,6 +162,11 @@
       width: 100%;
       height: 100%;
       border: 0;
+    }
+
+    .arrow {
+      color: #ccc;
+      font-weight: bold;
     }
 
     .loading .embedded {
@@ -219,18 +224,26 @@
     var SIMPLE_DATE_REGEX = /^\d{4}-\d{2}(-\d{2})?$/;
 
     var LIST_ITEM_TEMPLATE =
-      '<li class="item gallery-name">' +
+      '<li class="item album-name">' +
         '<a href="{{url}}" data-index="{{index}}">' +
           '{{caption}}' +
         '</a>' +
       '</li>';
 
     var LIST_ITEM_TEMPLATE_WITH_DATE =
-      '<li class="item gallery-name">' +
+      '<li class="item album-name">' +
         '<a href="{{url}}" data-index="{{index}}">' +
           '{{caption}}' +
         '</a>' +
         '<span class="date"> ({{date}})</span>' +
+      '</li>';
+
+    var LIST_ITEM_SERIES_TEMPLATE = 
+      '<li class="item album-name">' +
+        '<a href="{{url}}" data-index="{{index}}">' +
+          '{{caption}}' +
+          '<span class="arrow"> \u21fe</span>' +
+        '</a>' +
       '</li>';
 
     var SPINNER_OPTIONS = {
@@ -238,34 +251,34 @@
       speed: 1, trail: 60, shadow: true
     };
 
-    var GALLERIES = [
+    var ALBUMS = [
       <?php
-        global $galleries; /* generated above */
-        foreach ($galleries as $gallery) {
-          printf('"' . $gallery . '",' . "\n");
+        global $albums; /* generated above */
+        foreach ($albums as $a) {
+          printf('"' . $a . '",' . "\n");
         }
       ?>
     ];
 
-    var SETS = [
+    var SERIES = [
       <?php
-        global $sets; /* generated above */
-        foreach ($sets as $set) {
-          printf('"' . $set . '",' . "\n");
+        global $series; /* generated above */
+        foreach ($series as $s) {
+          printf('"' . $s . '",' . "\n");
         }
       ?>
     ];
 
-    var lastSelected = { }; /* key=gallery, value=image */
-    var currentGallery = '';
+    var lastSelected = { }; /* key=album, value=image */
+    var currentAlbum = '';
     var lastHash;
 
     function writeHash(hash, options) {
       options = options || { };
 
       /* if the hash doesn't contain a specific image, for example it
-      looks like this: 'foo.com/photos/#gallery, and the new url has
-      an image, e.g. foo.com/photos/#gallery/test.png then replace the
+      looks like this: 'foo.com/photos/#album, and the new url has
+      an image, e.g. foo.com/photos/#album/test.png then replace the
       existing url. this is a bit of a hack to keep the backstack clean. */
       var currentHash = getHashFromUrl().split('/');
 
@@ -273,7 +286,7 @@
         currentHash[0] = currentHash[0].substring(1); /* remove # */
         /* if there is no hash then we just loaded -- we also replace the
         url in this state so to the user the first url appears to be
-        the first selected gallery */
+        the first selected album */
         if (currentHash[0] === '' || currentHash[0] === hash.split('/')[0]) {
           options.replace = true;
         }
@@ -303,8 +316,8 @@
       return "#" + (window.location.href.split("#")[1] || "");
     }
 
-    function parseGalleryHash(hash) {
-      /* note this same method lives in gallery.php. it wouldn't be a big
+    function parseAlbumHash(hash) {
+      /* note this same method lives in album.php. it wouldn't be a big
       deal to exteranlize this in a .js file, but then that file would need
       to be distributed as well. to make this slightly less ugly from the
       user's standpoint we could use php to dynamically insert this (and
@@ -336,7 +349,7 @@
     function getBackgroundColor(options) {
       options = options || { };
       options.format = options.format || 'hash';
-      var parts = parseGalleryHash(options.hash);
+      var parts = parseAlbumHash(options.hash);
 
       if (parts.b) {
         if (options.format === 'css') {
@@ -371,20 +384,20 @@
     }
 
     function urlAtIndex(index, hash) {
-      var gallery = GALLERIES[index];
+      var album = ALBUMS[index];
       var selected = "";
 
       if (hash) {
         /* first try to grab the URL from the hash, if it exists.
         this has highest priority */
-        selected = parseGalleryHash(hash).i;
+        selected = parseAlbumHash(hash).i;
       }
 
       /* couldn't parse an image from the specified hash, see if
-      we've viewed this gallery before. if we have, the last viewed
+      we've viewed this album before. if we have, the last viewed
       image will be cached, so we'll load that */
       if (!selected) {
-        selected = getSelectedImageForGallery(gallery);
+        selected = getSelectedImageForAlbum(album);
       }
 
       if (selected) {
@@ -394,21 +407,21 @@
       var result =
         window.location.protocol + '//' +
         window.location.hostname +
-        window.location.pathname + gallery +
+        window.location.pathname + album +
         "#" + selected + getBackgroundColor();
 
       return result;
     }
 
-    function setSelectedImageForGallery(gallery, hash) {
-      var parts = parseGalleryHash(hash);
+    function setSelectedImageForAlbum(album, hash) {
+      var parts = parseAlbumHash(hash);
       if (parts.i && sessionStorage) {
-        lastSelected[gallery] = parts.i;
+        lastSelected[album] = parts.i;
       }
     }
 
-    function getSelectedImageForGallery(gallery) {
-      return lastSelected[gallery] || '';
+    function getSelectedImageForAlbum(album) {
+      return lastSelected[album] || '';
     }
 
     $(document).ready(function() {
@@ -416,7 +429,7 @@
         var $main = $('.main');
         var $spinnerContainer = $('.spinner-container');
         var spinner = new Spinner(SPINNER_OPTIONS);
-        var galleryLoading = false;
+        var albumLoading = false;
 
         var hashPollInterval;
 
@@ -427,16 +440,16 @@
           if (data) {
             switch (data.message) {
               case 'hashChanged':
-                if (currentGallery) {
+                if (currentAlbum) {
                   var hash = data.options.hash;
-                  writeHash(currentGallery + "/" + hash);
-                  setSelectedImageForGallery(currentGallery, hash);
+                  writeHash(currentAlbum + "/" + hash);
+                  setSelectedImageForAlbum(currentAlbum, hash);
                   updateBackgroundColor();
                 }
                 break;
 
-              case 'prevGallery': selectPrevGallery(); break;
-              case 'nextGallery': selectNextGallery(); break;
+              case 'prevAlbum': selectPrevAlbum(); break;
+              case 'nextAlbum': selectNextAlbum(); break;
             }
           }
         });
@@ -452,23 +465,23 @@
         var setLoading = function(loading) {
           loading = (loading === undefined) ? true : loading;
 
-          if (loading === galleryLoading) {
+          if (loading === albumLoading) {
             return;
           }
 
           if (loading) {
-            galleryLoading = true;
+            albumLoading = true;
             $main.addClass('loading');
             spinner.spin($spinnerContainer[0]);
           }
           else {
-            galleryLoading = false;
+            albumLoading = false;
             $main.removeClass('loading');
             spinner.stop();
           }
         };
 
-        /* if we don't destroy then re-create the iframe every time the gallery
+        /* if we don't destroy then re-create the iframe every time the album
         switches, its history gets updated and corrupts our backstack */
         resetIFrame = function(url) {
           if ($iframe) {
@@ -482,7 +495,7 @@
             $iframe.attr('src', url);
 
             /* setting src isn't good enough. in some browsers (older firefox,
-            newer chrome), navigating forward (e.g. to a gallery set), then back
+            newer chrome), navigating forward (e.g. to an album series), then back
             will cause the wrong iframe url to be loaded. solution was found:
             http://stackoverflow.com/questions/2648053/preventing-iframe-caching-in-browser */
             $iframe[0].contentWindow.location.href = url;
@@ -501,21 +514,21 @@
             index = parts[0];
             currentHashPath = parts[1];
 
-            index = Math.max(0, GALLERIES.indexOf(index));
+            index = Math.max(0, ALBUMS.indexOf(index));
           }
 
-          var gallery = GALLERIES[index];
-          if (gallery === currentGallery) {
+          var album = ALBUMS[index];
+          if (album === currentAlbum) {
             var lastHashPath = (lastHash || "").split("/")[1];
             if (lastHashPath !== currentHashPath) {
-              /* gallery is the same, but the image changed. user probably pressed
-              the back button, so let the current gallery know */
+              /* album is the same, but the image changed. user probably pressed
+              the back button, so let the current album know */
               post('changeHash', {hash: currentHashPath});
             }
           }
           else {
             /* mark active state */
-            var $items = $('.gallery-list .item');
+            var $items = $('.album-list .item');
             $items.removeClass('active');
             $items.eq(index).addClass('active');
 
@@ -529,21 +542,21 @@
               setLoading(false);
             });
 
-            setTimeout(function() {
-            }, 500);
-
-            currentGallery = GALLERIES[index];
+            currentAlbum = ALBUMS[index];
 
             /* write it back to the url */
             finalHashPath = currentHashPath || "";
+            /* needs leading path char */
             if (finalHashPath.length && finalHashPath.charAt(0) !== "/") {
               finalHashPath = "/" + finalHashPath;
             }
 
-            writeHash(GALLERIES[index] + finalHashPath);
+            writeHash(ALBUMS[index] + finalHashPath);
           }
         };
 
+        /* things like back button change the hash without us knowing,
+        so we need to monitor for changes. ugh. */
         var pollHash = function() {
           if (!hashPollInterval) {
             hashPollInterval = setInterval(function() {
@@ -557,7 +570,7 @@
         };
 
         var getSelectedIndex = function() {
-          var $el = $('.gallery-list .active a');
+          var $el = $('.album-list .active a');
 
           if ($el.length === 1) {
             return parseInt($el.eq(0).attr("data-index"), 10);
@@ -566,21 +579,21 @@
           return 0;
         };
 
-        var selectNextGallery = function() {
+        var selectNextAlbum = function() {
           var next = getSelectedIndex() + 1;
-          select(next >= GALLERIES.length ? 0 : next);
+          select(next >= ALBUMS.length ? 0 : next);
         };
 
-        var selectPrevGallery = function() {
+        var selectPrevAlbum = function() {
           var prev = getSelectedIndex() - 1;
-          select(prev < 0 ? GALLERIES.length - 1 : prev);
+          select(prev < 0 ? ALBUMS.length - 1 : prev);
         };
 
-        var scrollToSelectedGallery = function() {
+        var scrollToSelectedAlbum = function() {
           var $active = $('li.item.active');
           if ($active.length) {
             var pos = $active.position().top;
-            $('.gallery-list').animate({scrollTop: pos});
+            $('.album-list').animate({scrollTop: pos});
           }
         };
 
@@ -588,7 +601,8 @@
           $('.embedded').removeClass('hidden');
         });
 
-        $('.gallery-list').on('click', 'a', function(event) {
+        /* links in a album list open in the iframe */
+        $('.album-list').on('click', 'a', function(event) {
           event.preventDefault();
           var $el = $(event.currentTarget);
           var index = parseInt($el.attr("data-index"), 10);
@@ -602,51 +616,51 @@
 
             switch (event.keyCode) {
               case 37: post('prev'); break;
-              case 38: selectPrevGallery(); break;
+              case 38: selectPrevAlbum(); break;
               case 39: post('next'); break;
-              case 40: selectNextGallery(); break;
+              case 40: selectNextAlbum(); break;
             }
         });
 
         var i;
 
-        /* generate gallery list, add to DOM */
-        var $galleryList = $(".gallery-list");
-        var gallery, caption, parts, template, html;
-        for (i = 0; i < GALLERIES.length; i++) {
-            gallery = GALLERIES[i];
+        /* generate album list, add to DOM */
+        var $albumList = $(".album-list");
+        var album, caption, parts, template, html;
+        for (i = 0; i < ALBUMS.length; i++) {
+            album = ALBUMS[i];
 
-            caption = gallery.replace(/_/g, " ");
+            caption = album.replace(/_/g, " ");
             parts = parseListItem(caption);
 
             template = parts.date ?
               LIST_ITEM_TEMPLATE_WITH_DATE : LIST_ITEM_TEMPLATE;
 
             html = template
-                .replace("{{url}}", gallery)
+                .replace("{{url}}", album)
                 .replace("{{caption}}", parts.caption)
                 .replace("{{index}}", i)
                 .replace("{{date}}", parts.date);
 
-            $galleryList.append(html);
+            $albumList.append(html);
         }
 
-        /* generate set list */
-        var $setList = $(".set-list"), set;
-        for (i = 0; i < SETS.length; i++) {
-            html = LIST_ITEM_TEMPLATE
-                .replace("{{url}}", SETS[i])
-                .replace("{{caption}}", SETS[i].replace(/_/g, " "))
+        /* generate series items */
+        var $seriesList = $(".series-list"), series;
+        for (i = 0; i < SERIES.length; i++) {
+            html = LIST_ITEM_SERIES_TEMPLATE
+                .replace("{{url}}", SERIES[i])
+                .replace("{{caption}}", SERIES[i].replace(/_/g, " "))
                 .replace("{{index}}", i);
 
-            $setList.append(html);
+            $seriesList.append(html);
         }
 
-        $('.galleries').toggleClass('hidden', GALLERIES.length === 0);
-        $('.sets').toggleClass('hidden', SETS.length === 0);
+        $('.albums').toggleClass('hidden', ALBUMS.length === 0);
+        $('.series').toggleClass('hidden', SERIES.length === 0);
 
         select(getHashFromUrl());
-        scrollToSelectedGallery();
+        scrollToSelectedAlbum();
         pollHash();
     });
 
@@ -656,13 +670,13 @@
 
 <body onselectstart="return false">
   <div class="left">
-    <div class="galleries">
+    <div class="albums">
       <div class="title">albums:</div>
-      <ul class="gallery-list"></ul>
+      <ul class="album-list"></ul>
     </div>
-    <div class="sets hidden">
-      <div class="title">sets:</div>
-      <ul class="set-list"></ul>
+    <div class="series hidden">
+      <div class="title">series:</div>
+      <ul class="series-list"></ul>
     </div>
   </div>
   <div class="main loading">
