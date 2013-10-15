@@ -73,10 +73,11 @@
     .left {
       position: absolute;
       left: 10px;
-      top: 20px;
+      top: 10px;
       bottom: 20px;
       width: 180px;
       padding-left: 10px;
+      padding-top: 10px;
       overflow-x: hidden;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
