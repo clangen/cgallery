@@ -76,7 +76,7 @@
       top: 20px;
       bottom: 20px;
       width: 180px;
-      margin-left: 10px;
+      padding-left: 10px;
       overflow-x: hidden;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
@@ -191,7 +191,8 @@
 
     .back {
       display: none;
-      padding: 4px 8px;
+      padding: 5px 8px;
+      padding-right: 10px;
       border-radius: 4px;
       background-color: #444;
       margin-bottom: 8px;
@@ -652,7 +653,7 @@
           select(index);
         });
 
-        $('.back .link').on('click', function() {
+        $('.back').on('click', function() {
           var path = window.location.pathname.split('/');
           while (path.length) {
             if (path.pop() !== '') {
