@@ -72,10 +72,11 @@
 
     .left {
       position: absolute;
-      left: 20px;
+      left: 10px;
       top: 20px;
       bottom: 20px;
       width: 180px;
+      margin-left: 10px;
       overflow-x: hidden;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
@@ -188,6 +189,30 @@
       display: block;
     }
 
+    .back {
+      display: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background-color: #444;
+      margin-bottom: 8px;
+      color: #aaa;
+      font-size: 12px;
+      -webkit-box-shadow: 0 0 5px #222;
+      -moz-box-shadow: 0 0 5px #222;
+      box-shadow: 0 0 5px #222;
+    }
+
+    .back.show {
+      display: inline-block;
+    }
+
+    .back:hover {
+      background-color: #4c4c4c;
+      color: #ccc;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
     ::-webkit-scrollbar {
         height: 9px;
         width: 9px;
@@ -238,7 +263,7 @@
         '<span class="date"> ({{date}})</span>' +
       '</li>';
 
-    var LIST_ITEM_SERIES_TEMPLATE = 
+    var LIST_ITEM_SERIES_TEMPLATE =
       '<li class="item album-name">' +
         '<a href="{{url}}" data-index="{{index}}">' +
           '{{caption}}' +
@@ -272,6 +297,24 @@
     var lastSelected = { }; /* key=album, value=image */
     var currentAlbum = '';
     var lastHash;
+    var query = parseQueryParams();
+
+    function parseQueryParams() {
+        var result = { };
+
+        var query = window.location.search;
+        if (query && query[0] === '?') {
+            var parts = query.substring(1).split('&'), keyValue;
+            for (var i = 0; i < parts.length; i++) {
+                keyValue = parts[i].split('=');
+                if (keyValue.length === 2) {
+                    result[keyValue[0]] = decodeURIComponent(keyValue[1])
+                }
+            }
+        }
+
+        return result;
+    }
 
     function writeHash(hash, options) {
       options = options || { };
@@ -609,6 +652,19 @@
           select(index);
         });
 
+        $('.back .link').on('click', function() {
+          var path = window.location.pathname.split('/');
+          while (path.length) {
+            if (path.pop() !== '') {
+              break;
+            }
+          }
+
+          if (path.length) {
+            window.location = path.join('/') + '/';
+          }
+        });
+
         $("body").on("keydown", function(event) {
             if (event.altKey || event.metaKey) {
                 return true; /* don't swallow browser back/forward shortcuts */
@@ -658,18 +714,23 @@
 
         $('.albums').toggleClass('hidden', ALBUMS.length === 0);
         $('.series').toggleClass('hidden', SERIES.length === 0);
+        $('.back').toggleClass('show', query.back === "1");
 
         select(getHashFromUrl());
         scrollToSelectedAlbum();
         pollHash();
     });
-
 </script>
 
 </head>
 
 <body onselectstart="return false">
   <div class="left">
+    <div class="back">
+      <span class="link">
+        <span class="arrow">&#x21fd;</span> back
+      </span>
+    </div>
     <div class="albums">
       <div class="title">albums:</div>
       <ul class="album-list"></ul>
