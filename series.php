@@ -299,6 +299,7 @@
     var lastSelected = { }; /* key=album, value=image */
     var currentAlbum = '';
     var lastHash;
+    var backHash;
     var query = parseQueryParams();
 
     function parseQueryParams() {
@@ -550,6 +551,8 @@
         var select = function(index) {
           var currentHashPath; /* only set if index is typeof string */
 
+          index = index || 0;
+
           if (typeof index === 'string') {
             if (index.charAt(0) === '#') {
               index = index.substring(1);
@@ -642,85 +645,123 @@
           }
         };
 
-        $('.embedded').on('load', function() {
-          $('.embedded').removeClass('hidden');
-        });
+        var initEventListeners = function() {
+          $('.embedded').on('load', function() {
+            $('.embedded').removeClass('hidden');
+          });
 
-        /* links in a album list open in the iframe */
-        $('.album-list').on('click', 'a', function(event) {
-          event.preventDefault();
-          var $el = $(event.currentTarget);
-          var index = parseInt($el.attr("data-index"), 10);
-          select(index);
-        });
+          /* links in a album list open in the iframe. override the default
+          action so url can still be right clicked and deep linked */
+          $('.album-list').on('click', 'a', function(event) {
+            event.preventDefault();
+            var $el = $(event.currentTarget);
+            var index = parseInt($el.attr("data-index"), 10);
+            select(index);
+          });
 
-        $('.back').on('click', function() {
-          var path = window.location.pathname.split('/');
-          while (path.length) {
-            if (path.pop() !== '') {
-              break;
+          /* opens an external link to a sub-series, and adds the currently
+          selected image to the url. this will assure the "<- back" button
+          restores what the user was last looking at */
+          $('.series-list').on('click', 'a', function(event) {
+            event.preventDefault();
+            var url = $(event.currentTarget).attr('href');
+            url += '#back:' + encodeURIComponent(getHashFromUrl());
+            window.location.href = url;
+          });
+
+          /* override default back behavior so we can add the back hash if
+          we have one. maintains right click -> copy url functionality */
+          $('.back').on('click', function(event) {
+            event.preventDefault();
+            var url = $(event.currentTarget).attr('href');
+            url += backHash || '';
+            window.location.href = url;
+          });
+
+          $("body").on("keydown", function(event) {
+              if (event.altKey || event.metaKey) {
+                  return true; /* don't swallow browser back/forward shortcuts */
+              }
+
+              switch (event.keyCode) {
+                case 37: post('prev'); break;
+                case 38: selectPrevAlbum(); break;
+                case 39: post('next'); break;
+                case 40: selectNextAlbum(); break;
+              }
+          });
+        };
+
+        var getBackBaseUrl = function() {
+            var path = window.location.pathname.split('/');
+            while (path.length) {
+              if (path.pop() !== '') {
+                break;
+              }
             }
+
+            return path.join('/');
+        };
+
+        var render = function() {
+          /* generate album list, add to DOM */
+          var $albumList = $(".album-list");
+          var album, caption, parts, template, html;
+          for (i = 0; i < ALBUMS.length; i++) {
+              album = ALBUMS[i];
+
+              caption = album.replace(/_/g, " ");
+              parts = parseListItem(caption);
+
+              template = parts.date ?
+                LIST_ITEM_TEMPLATE_WITH_DATE : LIST_ITEM_TEMPLATE;
+
+              html = template
+                  .replace("{{url}}", album)
+                  .replace("{{caption}}", parts.caption)
+                  .replace("{{index}}", i)
+                  .replace("{{date}}", parts.date);
+
+              $albumList.append(html);
           }
 
-          if (path.length) {
-            window.location = path.join('/') + '/';
+          /* generate series items */
+          var $seriesList = $(".series-list"), series;
+          for (i = 0; i < SERIES.length; i++) {
+              html = LIST_ITEM_SERIES_TEMPLATE
+                  .replace("{{url}}", SERIES[i] + "?b=1")
+                  .replace("{{caption}}", SERIES[i].replace(/_/g, " "))
+                  .replace("{{index}}", i);
+
+              $seriesList.append(html);
           }
-        });
 
-        $("body").on("keydown", function(event) {
-            if (event.altKey || event.metaKey) {
-                return true; /* don't swallow browser back/forward shortcuts */
-            }
+          $('.albums').toggleClass('hidden', ALBUMS.length === 0);
+          $('.series').toggleClass('hidden', SERIES.length === 0);
 
-            switch (event.keyCode) {
-              case 37: post('prev'); break;
-              case 38: selectPrevAlbum(); break;
-              case 39: post('next'); break;
-              case 40: selectNextAlbum(); break;
-            }
-        });
+          var initialHash = getHashFromUrl() || '';
 
-        var i;
+          /* we were given a back route, parse it out */
+          if (initialHash.indexOf("#back:") === 0) {
+            backHash = decodeURIComponent(initialHash.split(":")[1]);
+          }
 
-        /* generate album list, add to DOM */
-        var $albumList = $(".album-list");
-        var album, caption, parts, template, html;
-        for (i = 0; i < ALBUMS.length; i++) {
-            album = ALBUMS[i];
+          /* if we have ?b=1 or a #back: route show the back button. if we
+          only have ?b=1 then the previously selected image will not be
+          displayed. also, doing this users can still deep link to a nested
+          series without an excessively long url */
+          if (backHash || query.b) {
+            $('.back').addClass('show');
+            $('.back').attr('href', getBackBaseUrl() + '/');
+          }
 
-            caption = album.replace(/_/g, " ");
-            parts = parseListItem(caption);
+          select(getHashFromUrl());
+          scrollToSelectedAlbum();
+          pollHash();
+        };
 
-            template = parts.date ?
-              LIST_ITEM_TEMPLATE_WITH_DATE : LIST_ITEM_TEMPLATE;
-
-            html = template
-                .replace("{{url}}", album)
-                .replace("{{caption}}", parts.caption)
-                .replace("{{index}}", i)
-                .replace("{{date}}", parts.date);
-
-            $albumList.append(html);
-        }
-
-        /* generate series items */
-        var $seriesList = $(".series-list"), series;
-        for (i = 0; i < SERIES.length; i++) {
-            html = LIST_ITEM_SERIES_TEMPLATE
-                .replace("{{url}}", SERIES[i] + "?back=1")
-                .replace("{{caption}}", SERIES[i].replace(/_/g, " "))
-                .replace("{{index}}", i);
-
-            $seriesList.append(html);
-        }
-
-        $('.albums').toggleClass('hidden', ALBUMS.length === 0);
-        $('.series').toggleClass('hidden', SERIES.length === 0);
-        $('.back').toggleClass('show', query.back === "1");
-
-        select(getHashFromUrl());
-        scrollToSelectedAlbum();
-        pollHash();
+        initEventListeners();
+        render();
     });
 </script>
 
@@ -728,11 +769,11 @@
 
 <body onselectstart="return false">
   <div class="left">
-    <div class="back">
+    <a href="#" class="back">
       <span class="link">
         <span class="arrow">&#x21fd;</span> back
       </span>
-    </div>
+    </a>
     <div class="albums">
       <div class="title">albums:</div>
       <ul class="album-list"></ul>
