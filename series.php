@@ -341,8 +341,6 @@
       hash = "#" + hash;
 
       if (hash !== window.location.hash) {
-        console.log('writing', hash, 'replace', options.replace);
-
         if (options && options.replace) {
           if (window.history.replaceState) {
             window.history.replaceState({ }, document.title, hash);
