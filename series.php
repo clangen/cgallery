@@ -338,17 +338,19 @@
         }
       }
 
-      lastHash = "#" + hash;
+      hash = "#" + hash;
 
       if (hash !== window.location.hash) {
+        console.log('writing', hash, 'replace', options.replace);
+
         if (options && options.replace) {
           if (window.history.replaceState) {
-            window.history.replaceState({ }, document.title, '#' + hash);
+            window.history.replaceState({ }, document.title, hash);
           }
           else {
             /* stolen from backbone */
             var href = location.href.replace(/(javascript:|#).*$/, '');
-            location.replace(href + '#' + hash);
+            location.replace(href + hash);
           }
         }
         else {
@@ -471,7 +473,7 @@
     }
 
     $(document).ready(function() {
-        var $iframe = $('.embedded');
+        var $iframe = null;
         var $main = $('.main');
         var $spinnerContainer = $('.spinner-container');
         var spinner = new Spinner(SPINNER_OPTIONS);
@@ -487,10 +489,12 @@
             switch (data.message) {
               case 'hashChanged':
                 if (currentAlbum) {
+                  pollHash(false);
                   var hash = data.options.hash;
                   writeHash(currentAlbum + "/" + hash);
                   setSelectedImageForAlbum(currentAlbum, hash);
                   updateBackgroundColor();
+                  pollHash();
                 }
                 break;
 
@@ -537,14 +541,18 @@
           $iframe = $('<iframe class="embedded"></iframe>');
           $('.main').append($iframe);
 
-          setTimeout(function() {
-            $iframe.attr('src', url);
+          /* NOTE: if we set the source asynchronously, e.g. in the setTimeout
+          just below, it will mess up our back stack in chrome. basically, when
+          the user presses back the iframe will move back, instead of the outer
+          frame */
+          $iframe.attr('src', url);
 
+          setTimeout(function() {
             /* setting src isn't good enough. in some browsers (older firefox,
             newer chrome), navigating forward (e.g. to an album series), then back
             will cause the wrong iframe url to be loaded. solution was found:
             http://stackoverflow.com/questions/2648053/preventing-iframe-caching-in-browser */
-            $iframe[0].contentWindow.location.href = url;
+            $iframe[0].contentWindow.location.href.replace(url);
           });
         };
 
@@ -605,8 +613,12 @@
 
         /* things like back button change the hash without us knowing,
         so we need to monitor for changes. ugh. */
-        var pollHash = function() {
-          if (!hashPollInterval) {
+        var pollHash = function(poll) {
+          if (poll === false) {
+            clearInterval(hashPollInterval);
+            hashPollInterval = undefined;
+          }
+          else if (!hashPollInterval) {
             hashPollInterval = setInterval(function() {
               var currentHash = getHashFromUrl();
               if (currentHash !== lastHash) {

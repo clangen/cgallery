@@ -487,6 +487,9 @@
         }
 
         function writeHash(options) {
+            /* don't write the hash when embedded, otherwise history information
+            will seep up into the outer container and mess with back behavior.
+            we will notify the outer container via postMessage instead */
             if (embedded) {
                 return;
             }
