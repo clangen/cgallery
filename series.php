@@ -185,7 +185,11 @@
       margin-left: -32px; /* width / 2 */
     }
 
-    .no-galleries {
+    .no-albums.visible {
+      display: block;
+    }
+
+    .no-albums {
       display: none;
       position: absolute;
       height: 1.2em;
@@ -198,7 +202,7 @@
       text-shadow: 0 0 8px #222;
     }
 
-    .no-albums .no-galleries,
+    .no-albums .no-albums,
     .no-albums .spinner-container,
     .loading .spinner-container {
       display: block;
@@ -837,14 +841,11 @@
             $('.back').attr('href', getBackBaseUrl() + '/');
           }
 
-          if (ALBUMS.length === 0) {
-            $(document.body).addClass('no-albums');
-          }
-          else {
-            select(getHashFromUrl());
-            scrollToSelectedAlbum();
-            pollHash();
-          }
+          $('.no-albums').toggleClass('visible', !(ALBUMS.length > 0));
+
+          select(getHashFromUrl());
+          scrollToSelectedAlbum();
+          pollHash();
         };
 
         initEventListeners();
@@ -869,7 +870,9 @@
   <div class="main loading">
     <!-- iframe inserted dynamically -->
     <div class="spinner-container"></div>
-    <div class="no-galleries">no albums to display</div>
+    <div class="no-albums">
+      <span class="no-albums-text">there are no albums to display.
+    </div>
   </div>
   <div class="footer">
     <a href="https://bitbucket.org/clangen/cgallery" target="_new">https://bitbucket.org/clangen/cgallery</a>
