@@ -301,6 +301,7 @@
     var lastHash;
     var backHash;
     var query = parseQueryParams();
+    var model = createDataModel();
 
     function parseQueryParams() {
         var result = { };
@@ -317,6 +318,24 @@
         }
 
         return result;
+    }
+
+    /* merges and sorts the different types of albums we support */
+    function createDataModel() {
+      var result = [];
+
+      var add = function(arr, type) {
+        for (var i = 0; i < arr.length; i++) {
+          result.push({type: type, name: arr[i]});
+        }
+      };
+
+      add(ALBUMS, 'album');
+      add(SERIES, 'series');
+
+      return result.sort(function(a, b) {
+        return a.name - b.name;
+      });
     }
 
     function writeHash(hash, options) {
@@ -700,6 +719,48 @@
                 case 40: selectNextAlbum(); break;
               }
           });
+        };
+
+        /* given a start index, finds the next or previous album. by default
+        this will also wrap around to the beginning/end, depending on the
+        direction that is specified. there has to be a better way to do this */
+        var findAlbum = function(start, options) {
+          start = start || 0;
+          options = options || { };
+          options.wrap = (options.wrap === undefined) ? true : options.wrap;
+          var result, i;
+
+          var iterate = function(from, to, dir) {
+            if (dir === 'b') { /* backward */
+              for (i = from; i >= to; i--) {
+                if (model[i] && model[i].type === 'album') {
+                  return i;
+                }
+              }
+            }
+            else if (dir === 'f') { /* forward */
+              for (i = from; i <= to; i++) {
+                if (model[i] && model[i].type === 'album') {
+                  return i;
+                }
+              }
+            }
+          }
+
+          if (options.reverse) {
+            result = iterate(start - 1, 0, 'b');
+            if (result === undefined && options.wrap) {
+              result = iterate(model.length - 1, start - 1, 'b');
+            }
+          }
+          else {
+            result = iterate(start + 1, model.length - 1, 'f');
+            if (result === undefined && options.wrap, 'f') {
+              result = iterate(0, start - 1);
+            }
+          }
+
+          return (result === undefined) ? start : result;
         };
 
         var getBackBaseUrl = function() {
