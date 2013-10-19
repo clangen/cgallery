@@ -402,6 +402,8 @@
         else {
           window.location.hash = hash;
         }
+
+        lastHash = hash;
       }
     }
 
@@ -543,6 +545,9 @@
             switch (data.message) {
               case 'hashChanged':
                 if (currentAlbum) {
+                  /* here the image has already updated internally, so we want
+                  to just write the hash without triggering a message back to
+                  the embedded gallery. stop polling, update, resume polling */
                   pollHash(false);
                   var hash = data.options.hash;
                   writeHash(currentAlbum + "/" + hash);
@@ -678,7 +683,6 @@
               var currentHash = getHashFromUrl();
               if (currentHash !== lastHash) {
                 select(currentHash);
-                lastHash = currentHash;
               }
             }, 250);
           }
