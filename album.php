@@ -115,6 +115,7 @@
     }
 
     body {
+        font-family: sans-serif;
         background-color: #404040;
     }
 
@@ -296,6 +297,23 @@
 
     .loading .current-image {
         display: none;
+    }
+
+    .no-images-text {
+        display: none;
+        position: absolute;
+        left: 0;
+        right: 0;
+        text-align: center;
+        top: 50%;
+        margin-top: -0.6em;
+        height: 1.2em;
+        color: #bbb;
+        text-shadow: 0 0 8px #222;
+    }
+
+    .no-images .no-images-text {
+        display: block;
     }
 
     ::-webkit-scrollbar {
@@ -679,22 +697,27 @@
         }
 
         function render(params) {
-            params = params || parseHash();
-
-            var image = params.i;
-            if (!image || IMAGES.indexOf(image) === -1) {
-                image = IMAGES[0];
+            if (IMAGES.length === 0) {
+                $body.addClass('no-images');
             }
+            else {
+                params = params || parseHash();
 
-            if (params.b) {
-                $("body").css("background-color", params.b);
+                var image = params.i;
+                if (!image || IMAGES.indexOf(image) === -1) {
+                    image = IMAGES[0];
+                }
+
+                if (params.b) {
+                    $body.css("background-color", params.b);
+                }
+
+                setTimeout(function() {
+                    setImage(image);
+                    writeHash({image: image});
+                    pollHash();
+                }, 250);
             }
-
-            setTimeout(function() {
-                setImage(image);
-                writeHash({image: image});
-                pollHash();
-            }, 250);
         }
 
         function keyPressed(event) {
@@ -782,6 +805,7 @@
         <div class="center">
             <div class="current-image-container">
                 <img class="current-image">
+                <div class="no-images-text">no images</div>
                 <div class="spinner-container"></div>
             </div>
         </div>
