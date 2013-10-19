@@ -871,7 +871,7 @@
     <!-- iframe inserted dynamically -->
     <div class="spinner-container"></div>
     <div class="no-albums">
-      <span class="no-albums-text">there are no albums to display.
+      <span class="no-albums-text">there are no albums here.
     </div>
   </div>
   <div class="footer">

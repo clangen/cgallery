@@ -35,7 +35,7 @@ php ~/cgallery/album.php > index.html
 ```
 
 ### series.php:
-* indexes a collection of individual albums (e.g. family photos)
+* indexes a directory of albums and/or series (e.g. family photos)
 
 ```sh
 mkdir family_photos

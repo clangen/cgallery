@@ -805,7 +805,7 @@
         <div class="center">
             <div class="current-image-container">
                 <img class="current-image">
-                <div class="no-images-text">there are no images to display.</div>
+                <div class="no-images-text">there are no images here.</div>
                 <div class="spinner-container"></div>
             </div>
         </div>
