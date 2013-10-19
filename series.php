@@ -498,9 +498,17 @@
         selected = selected + '+';
       }
 
+      var port = window.location.port;
+      if (port && port !== "80" && port !== "443") {
+        port = ":" + port;
+      }
+      else {
+        port = "";
+      }
+
       var result =
         window.location.protocol + '//' +
-        window.location.hostname +
+        window.location.hostname + port +
         window.location.pathname + album +
         "#" + selected + getBackgroundColor();
 
@@ -605,7 +613,8 @@
         var select = function(index) {
           var currentHashPath; /* only set if index is typeof string */
 
-          index = index || 0;
+          var firstAlbumIndex = findAlbum(-1);
+          index = index || firstAlbumIndex;
 
           if (typeof index === 'string') {
             if (index.charAt(0) === '#') {
@@ -616,7 +625,7 @@
             index = parts[0];
             currentHashPath = parts[1];
 
-            index = Math.max(0, model.find(index, 'album'));
+            index = Math.max(firstAlbumIndex, model.find(index, 'album'));
           }
 
           var album = model[index].name;
@@ -811,16 +820,21 @@
               if (item.type === 'album') {
                 template = parts.date ?
                   LIST_ITEM_TEMPLATE_WITH_DATE : LIST_ITEM_TEMPLATE;
-              }
-              else if (item.type === 'series') {
-                template = LIST_ITEM_SERIES_TEMPLATE;
-              }
 
-              html = template
+                html = template
                   .replace("{{url}}", item.name)
                   .replace("{{caption}}", parts.caption)
                   .replace("{{index}}", i)
                   .replace("{{date}}", parts.date);
+              }
+              else if (item.type === 'series') {
+                template = LIST_ITEM_SERIES_TEMPLATE;
+
+                html = template
+                  .replace("{{url}}", item.name + "?b=1")
+                  .replace("{{caption}}", parts.caption)
+                  .replace("{{index}}", i);
+              }
 
               $albumList.append(html);
           }
@@ -837,8 +851,16 @@
           displayed. also, doing this users can still deep link to a nested
           series without an excessively long url */
           if (backHash || query.b) {
+            var backUrl = getBackBaseUrl();
             $('.back').addClass('show');
-            $('.back').attr('href', getBackBaseUrl() + '/');
+            $('.back').attr('href', backUrl + '/');
+
+            /* make things a bit more user friendly if we can figure out the
+            name of the series we want to go back to */
+            var prevPath = backUrl.split("/").pop();
+            if (prevPath) {
+              $('.back .back-text').text('back to ' + prevPath.replace(/_/g, " "));
+            }
           }
 
           $('.no-albums').toggleClass('visible', !(ALBUMS.length > 0));
@@ -859,7 +881,7 @@
   <div class="left">
     <a href="#" class="back">
       <span class="link">
-        <span class="arrow">&#x21fd;</span> back
+        <span class="arrow">&#x21fd;</span> <span class="back-text">back</span>
       </span>
     </a>
     <div class="albums">
