@@ -132,8 +132,7 @@
       color: #666;
     }
 
-    .album-list,
-    .series-list {
+    .album-list {
       padding-left: 0px;
     }
 
@@ -333,9 +332,20 @@
       add(ALBUMS, 'album');
       add(SERIES, 'series');
 
-      return result.sort(function(a, b) {
-        return a.name - b.name;
+      result = result.sort(function(a, b) {
+        return a.name.localeCompare(b.name);
       });
+
+      result.find = function(name, type) {
+        for (var i = 0; i < result.length; i++) {
+          if (result[i].name === name && result[i].type === type) {
+            return i;
+          }
+        }
+        return -1;
+      }
+
+      return result;
     }
 
     function writeHash(hash, options) {
@@ -449,7 +459,7 @@
     }
 
     function urlAtIndex(index, hash) {
-      var album = ALBUMS[index];
+      var album = model[index].name;
       var selected = "";
 
       if (hash) {
@@ -587,10 +597,10 @@
             index = parts[0];
             currentHashPath = parts[1];
 
-            index = Math.max(0, ALBUMS.indexOf(index));
+            index = Math.max(0, model.find(index, 'album'));
           }
 
-          var album = ALBUMS[index];
+          var album = model[index].name;
           if (album === currentAlbum) {
             var lastHashPath = (lastHash || "").split("/")[1];
             if (lastHashPath !== currentHashPath) {
@@ -615,7 +625,7 @@
               setLoading(false);
             });
 
-            currentAlbum = ALBUMS[index];
+            currentAlbum = model[index].name;
 
             /* write it back to the url */
             finalHashPath = currentHashPath || "";
@@ -624,7 +634,7 @@
               finalHashPath = "/" + finalHashPath;
             }
 
-            writeHash(ALBUMS[index] + finalHashPath);
+            writeHash(model[index].name + finalHashPath);
           }
         };
 
@@ -657,13 +667,11 @@
         };
 
         var selectNextAlbum = function() {
-          var next = getSelectedIndex() + 1;
-          select(next >= ALBUMS.length ? 0 : next);
+          select(findAlbum(getSelectedIndex()));
         };
 
         var selectPrevAlbum = function() {
-          var prev = getSelectedIndex() - 1;
-          select(prev < 0 ? ALBUMS.length - 1 : prev);
+          select(findAlbum(getSelectedIndex(), {reverse: true}));
         };
 
         var scrollToSelectedAlbum = function() {
@@ -684,18 +692,16 @@
           $('.album-list').on('click', 'a', function(event) {
             event.preventDefault();
             var $el = $(event.currentTarget);
-            var index = parseInt($el.attr("data-index"), 10);
-            select(index);
-          });
+            var index = parseInt($el.attr("data-index"), 10) || 0;
 
-          /* opens an external link to a sub-series, and adds the currently
-          selected image to the url. this will assure the "<- back" button
-          restores what the user was last looking at */
-          $('.series-list').on('click', 'a', function(event) {
-            event.preventDefault();
-            var url = $(event.currentTarget).attr('href');
-            url += '#back:' + encodeURIComponent(getHashFromUrl());
-            window.location.href = url;
+            if (model[index].type === 'album') {
+              select(index);
+            }
+            else if (model[index].type === 'series') {
+              var url = $(event.currentTarget).attr('href');
+              url += '#back:' + encodeURIComponent(getHashFromUrl());
+              window.location.href = url;
+            }
           });
 
           /* override default back behavior so we can add the back hash if
@@ -755,8 +761,8 @@
           }
           else {
             result = iterate(start + 1, model.length - 1, 'f');
-            if (result === undefined && options.wrap, 'f') {
-              result = iterate(0, start - 1);
+            if (result === undefined && options.wrap) {
+              result = iterate(0, start - 1, 'f');
             }
           }
 
@@ -777,38 +783,28 @@
         var render = function() {
           /* generate album list, add to DOM */
           var $albumList = $(".album-list");
-          var album, caption, parts, template, html;
-          for (i = 0; i < ALBUMS.length; i++) {
-              album = ALBUMS[i];
-
-              caption = album.replace(/_/g, " ");
+          var item, caption, parts, template, html;
+          for (i = 0; i < model.length; i++) {
+              item = model[i];
+              caption = item.name.replace(/_/g, " ");
               parts = parseListItem(caption);
 
-              template = parts.date ?
-                LIST_ITEM_TEMPLATE_WITH_DATE : LIST_ITEM_TEMPLATE;
+              if (item.type === 'album') {
+                template = parts.date ?
+                  LIST_ITEM_TEMPLATE_WITH_DATE : LIST_ITEM_TEMPLATE;
+              }
+              else if (item.type === 'series') {
+                template = LIST_ITEM_SERIES_TEMPLATE;
+              }
 
               html = template
-                  .replace("{{url}}", album)
+                  .replace("{{url}}", item.name)
                   .replace("{{caption}}", parts.caption)
                   .replace("{{index}}", i)
                   .replace("{{date}}", parts.date);
 
               $albumList.append(html);
           }
-
-          /* generate series items */
-          var $seriesList = $(".series-list"), series;
-          for (i = 0; i < SERIES.length; i++) {
-              html = LIST_ITEM_SERIES_TEMPLATE
-                  .replace("{{url}}", SERIES[i] + "?b=1")
-                  .replace("{{caption}}", SERIES[i].replace(/_/g, " "))
-                  .replace("{{index}}", i);
-
-              $seriesList.append(html);
-          }
-
-          $('.albums').toggleClass('hidden', ALBUMS.length === 0);
-          $('.series').toggleClass('hidden', SERIES.length === 0);
 
           var initialHash = getHashFromUrl() || '';
 
@@ -848,10 +844,6 @@
     <div class="albums">
       <div class="title">albums:</div>
       <ul class="album-list"></ul>
-    </div>
-    <div class="series hidden">
-      <div class="title">series:</div>
-      <ul class="series-list"></ul>
     </div>
   </div>
   <div class="main loading">
