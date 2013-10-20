@@ -14,7 +14,7 @@ git clone git@bitbucket.org:clangen/cgallery.git
     * **album.php**
     * **series.php**
 * cdn versions of:
-    * **jquery**
+    * **jQuery**
     * **spin.js**
 
 ### album.php:
@@ -81,4 +81,4 @@ it introduces (what what i believe to be) unnecessary release overhead for now. 
 
 > i angrily disagree with some of your answers and think you're idiot!
 
-the license allows you to change the implementation as you wish, so feel free.
+the license allows you to change the implementation as you wish, so feel free...

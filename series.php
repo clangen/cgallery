@@ -1,4 +1,12 @@
 <?php
+  /* series.php: v2.0
+  *
+  * indexes a directory of albums and/or (sub)-series.  Renders
+  * a simple webapp to view. works on most newish versions of major
+  * browsers.
+  *  
+  * references cdn versions of jQuery and spin.js.
+  */
   header("Content-Type: text/html; charset=utf-8");
 
   $albums = array();
@@ -88,6 +96,10 @@
       padding: 0;
       padding-bottom: 6px;
       list-style-type: none;
+    }
+
+    a:active { /* ie draws a grey background by default */
+      background-color: transparent;
     }
 
     .item a {
@@ -355,6 +367,7 @@
         return a.name.localeCompare(b.name);
       });
 
+      /* finds an item by name and type */
       result.find = function(name, type) {
         for (var i = 0; i < result.length; i++) {
           if (result[i].name === name && result[i].type === type) {
@@ -363,6 +376,48 @@
         }
         return -1;
       }
+
+      /* given a start index and type, find the previous or next element of
+      the same type. by default this will also wrap around to the beginning/end
+      (i.e. is circular find). TODO: clean up if possible */
+      result.adjacent = function(start, type, options) {
+        start = start || 0;
+        options = options || { };
+        options.wrap = (options.wrap === undefined) ? true : options.wrap;
+        var index, i;
+
+        var iterate = function(from, to, dir) {
+          if (dir === 'b') { /* backward */
+            for (i = from; i >= to; i--) {
+              if (model[i] && model[i].type === type) {
+                return i;
+              }
+            }
+          }
+          else if (dir === 'f') { /* forward */
+            for (i = from; i <= to; i++) {
+              if (model[i] && model[i].type === type) {
+                return i;
+              }
+            }
+          }
+        }
+
+        if (options.reverse) {
+          index = iterate(start - 1, 0, 'b');
+          if (index === undefined && options.wrap) {
+            index = iterate(model.length - 1, start - 1, 'b');
+          }
+        }
+        else {
+          index = iterate(start + 1, model.length - 1, 'f');
+          if (index === undefined && options.wrap) {
+            index = iterate(0, start - 1, 'f');
+          }
+        }
+
+        return (index === undefined) ? start : index;
+      };
 
       return result;
     }
@@ -618,7 +673,7 @@
         var select = function(index) {
           var currentHashPath; /* only set if index is typeof string */
 
-          var firstAlbumIndex = findAlbum(-1);
+          var firstAlbumIndex = model.adjacent(-1, 'album');
           index = index || firstAlbumIndex;
 
           if (typeof index === 'string') {
@@ -699,11 +754,11 @@
         };
 
         var selectNextAlbum = function() {
-          select(findAlbum(getSelectedIndex()));
+          select(model.adjacent(getSelectedIndex(), 'album'));
         };
 
         var selectPrevAlbum = function() {
-          select(findAlbum(getSelectedIndex(), {reverse: true}));
+          select(model.adjacent(getSelectedIndex(), 'album', {reverse: true}));
         };
 
         var scrollToSelectedAlbum = function() {
@@ -757,48 +812,6 @@
                 case 40: selectNextAlbum(); break;
               }
           });
-        };
-
-        /* given a start index, finds the next or previous album. by default
-        this will also wrap around to the beginning/end, depending on the
-        direction that is specified. there has to be a better way to do this */
-        var findAlbum = function(start, options) {
-          start = start || 0;
-          options = options || { };
-          options.wrap = (options.wrap === undefined) ? true : options.wrap;
-          var result, i;
-
-          var iterate = function(from, to, dir) {
-            if (dir === 'b') { /* backward */
-              for (i = from; i >= to; i--) {
-                if (model[i] && model[i].type === 'album') {
-                  return i;
-                }
-              }
-            }
-            else if (dir === 'f') { /* forward */
-              for (i = from; i <= to; i++) {
-                if (model[i] && model[i].type === 'album') {
-                  return i;
-                }
-              }
-            }
-          }
-
-          if (options.reverse) {
-            result = iterate(start - 1, 0, 'b');
-            if (result === undefined && options.wrap) {
-              result = iterate(model.length - 1, start - 1, 'b');
-            }
-          }
-          else {
-            result = iterate(start + 1, model.length - 1, 'f');
-            if (result === undefined && options.wrap) {
-              result = iterate(0, start - 1, 'f');
-            }
-          }
-
-          return (result === undefined) ? start : result;
         };
 
         var getBackBaseUrl = function() {

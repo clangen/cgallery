@@ -1,17 +1,12 @@
 <?php
-    /* cgallery 2.0 rc 2
-    *
-    * this source unit indexes a single directory of images. it is what
-    * is known as an "album" in cgallery lingo.
-    *
-    * this draws a filmstrip image selection and a fit-to-screen image.
-    * it also has back and forth button, and can handle its own history.
-    * when embedded, it talks to an "album list"
-    *
-    * php is used to autogen thumbnails.
-    *
-    * uses jquery and spin.js.
-    */
+  /* album.php: v2.0
+  *
+  * indexes a directory of images and creates thumbnails. Renders
+  * a simple webapp to view. works on most newish versions of major
+  * browsers.
+  *  
+  * references cdn versions of jQuery and spin.js.
+  */
     header("Content-Type: text/html; charset=utf-8");
 
     function listImages() {
