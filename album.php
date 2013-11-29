@@ -742,9 +742,11 @@
                 SCROLLBAR_HEIGHT_FUDGE = -4;
             }
 
+            var i;
+
             /* initialize the color picker */
             var colorButtons = $(".color-picker .color-button");
-            for (var i = 0; i < colorButtons.length; i++) {
+            for (i = 0; i < colorButtons.length; i++) {
                 var $button = $(colorButtons[i]);
                 var bg = $button.attr("data-bg");
 
@@ -754,7 +756,7 @@
             }
 
             /* add thumbnails to the strip */
-            for (var i = 0; i < IMAGES.length; i++) {
+            for (i = 0; i < IMAGES.length; i++) {
                 $strip.append(createThumbnail(IMAGES[i]));
             }
 

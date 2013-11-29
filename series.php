@@ -344,7 +344,7 @@
             for (var i = 0; i < parts.length; i++) {
                 keyValue = parts[i].split('=');
                 if (keyValue.length === 2) {
-                    result[keyValue[0]] = decodeURIComponent(keyValue[1])
+                    result[keyValue[0]] = decodeURIComponent(keyValue[1]);
                 }
             }
         }
@@ -377,7 +377,7 @@
           }
         }
         return -1;
-      }
+      };
 
       result.first = function(type) {
         for (var i = 0; i < result.length; i++) {
@@ -410,7 +410,7 @@
       };
 
       return result;
-    };
+    }
 
     function writeHash(hash, options) {
       options = options || { };
@@ -521,7 +521,7 @@
         caption = parts.join(' ');
       }
 
-      return { date: date, caption: caption }
+      return { date: date, caption: caption };
     }
 
     function urlAtIndex(index, hash) {
@@ -871,7 +871,7 @@
             }
           }
 
-          $('.no-albums').toggleClass('visible', !(ALBUMS.length > 0));
+          $('.no-albums').toggleClass('visible', (ALBUMS.length <= 0));
 
           select(getHashFromUrl());
           scrollToSelectedAlbum();
