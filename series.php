@@ -232,6 +232,7 @@
       -webkit-box-shadow: 0 0 5px #222;
       -moz-box-shadow: 0 0 5px #222;
       box-shadow: 0 0 5px #222;
+      margin-top: 6px;
     }
 
     .back.show {
@@ -377,50 +378,38 @@
         return -1;
       }
 
-      /* given a start index and type, find the previous or next element of
-      the same type. by default this will also wrap around to the beginning/end
-      (i.e. is circular find). TODO: clean up if possible */
+      result.first = function(type) {
+        for (var i = 0; i < result.length; i++) {
+          if (result[i] && result[i].type === type) {
+            return i;
+          }
+          return -1;
+        }
+      };
+
+      /* given a start index and type, find the previous or next element of the
+      same type. by default this will also wrap around */
       result.adjacent = function(start, type, options) {
         start = start || 0;
         options = options || { };
-        options.wrap = (options.wrap === undefined) ? true : options.wrap;
-        var index, i;
 
-        var iterate = function(from, to, dir) {
-          if (dir === 'b') { /* backward */
-            for (i = from; i >= to; i--) {
-              if (model[i] && model[i].type === type) {
-                return i;
-              }
-            }
-          }
-          else if (dir === 'f') { /* forward */
-            for (i = from; i <= to; i++) {
-              if (model[i] && model[i].type === type) {
-                return i;
-              }
-            }
+        var i = Math.max(start, 0);
+        var inc = options.reverse ? -1 : 1;
+        var count = result.length;
+        while (--count > 0) {
+          i += inc;
+          i = (i < 0) ? model.length - 1 : i;
+          i = (i >= model.length) ? 0 : i;
+          if (result[i] && result[i].type === type) {
+            return i;
           }
         }
 
-        if (options.reverse) {
-          index = iterate(start - 1, 0, 'b');
-          if (index === undefined && options.wrap) {
-            index = iterate(model.length - 1, start - 1, 'b');
-          }
-        }
-        else {
-          index = iterate(start + 1, model.length - 1, 'f');
-          if (index === undefined && options.wrap) {
-            index = iterate(0, start - 1, 'f');
-          }
-        }
-
-        return (index === undefined) ? start : index;
+        return 0;
       };
 
       return result;
-    }
+    };
 
     function writeHash(hash, options) {
       options = options || { };
@@ -673,7 +662,7 @@
         var select = function(index) {
           var currentHashPath; /* only set if index is typeof string */
 
-          var firstAlbumIndex = model.adjacent(-1, 'album');
+          var firstAlbumIndex = model.first('album');
           index = index || firstAlbumIndex;
 
           if (typeof index === 'string') {
@@ -738,6 +727,7 @@
               var currentHash = getHashFromUrl();
               if (currentHash !== lastHash) {
                 select(currentHash);
+                lastHash = currentHash;
               }
             }, 250);
           }
