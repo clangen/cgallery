@@ -1,11 +1,12 @@
 <?php
-  /* series.php: v2.0
-  *
-  * indexes a directory of albums and/or (sub)-series.  Renders
-  * a simple webapp to view. works on most newish versions of major
-  * browsers.
-  *  
-  * references cdn versions of jQuery and spin.js.
+  /*
+  * cgallery v2.1
+  * - works on most newish versions of webkit, ff, ie.
+  * 
+  * series.php:
+  * - indexes a directory of albums (and series).
+  * - provides an easy to use list of directories.
+  * - uses cdn versions of jquery and spin.js.
   */
   header("Content-Type: text/html; charset=utf-8");
 

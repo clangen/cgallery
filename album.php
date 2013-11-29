@@ -1,12 +1,12 @@
 <?php
-  /* album.php: v2.0
-  *
-  * indexes a directory of images and creates thumbnails. Renders
-  * a simple webapp to view. works on most newish versions of major
-  * browsers.
-  *  
-  * references cdn versions of jQuery and spin.js.
-  */
+    /* 
+    * cgallery v2.1
+    * album.php
+    *
+    * - indexes a directory of images and creates thumbnails.
+    * - works on most newish versions of major browsers.
+    * - uses cdn versions of jQuery and spin.js.
+    */
     header("Content-Type: text/html; charset=utf-8");
 
     function listImages() {
