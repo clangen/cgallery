@@ -1,6 +1,8 @@
 cgallery
 =========
-a simple photo management system.
+**a simple photo management system** that works well with webkit, gecko, and ie10+.
+
+cgallery is written in less than 2000 lines of php+js+css+html, and uses jquery and spin.js. the most basic use case requires no configuration: just drop **album.php** in a directory and go. 
 
 ####cgallery requires:
 * a **web server** with **php** and the **gd** image library
@@ -14,7 +16,7 @@ git clone git@bitbucket.org:clangen/cgallery.git
     * **album.php**
     * **series.php**
 * cdn versions of:
-    * **jQuery**
+    * **jquery**
     * **spin.js**
 
 ### album.php:

@@ -396,6 +396,10 @@
         ?>
     ];
 
+    IMAGES = IMAGES.sort(function(a, b) {
+        return a.localeCompare(b);
+    });
+
     var SCROLLBAR_HEIGHT_FUDGE = 0;
 
     $(document).ready(function() {
