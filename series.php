@@ -1,11 +1,10 @@
-<?php
+<?php /** series.php **/
   /*
   * cgallery v2.1
-  * series.php
   * 
   * series.php:
-  * - indexes a directory of albums (and series).
-  * - provides an easy to use list of directories.
+  * - indexes a directory of albums and other series.
+  * - output is a client-side webapp (a single html file).
   * - uses cdn versions of jquery and spin.js.
   * - works on most newish versions of webkit, ff, ie.
   */

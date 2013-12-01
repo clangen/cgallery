@@ -1,11 +1,11 @@
-<?php
+<?php /** album.php **/
   /* 
   * cgallery v2.1
-  * album.php
   *
+  * album.php:
   * - indexes a directory of images and creates thumbnails.
-  * - works on most newish versions of major browsers.
-  * - uses cdn versions of jQuery and spin.js.
+  * - output is a client-side webapp (a single html file with css+js).
+  * - uses cdn versions of jquery and spin.js.
   * - works on most newish versions of webkit, ff, ie.
   */
   header("Content-Type: text/html; charset=utf-8");
