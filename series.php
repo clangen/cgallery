@@ -1,12 +1,13 @@
 <?php
   /*
   * cgallery v2.1
-  * - works on most newish versions of webkit, ff, ie.
+  * series.php
   * 
   * series.php:
   * - indexes a directory of albums (and series).
   * - provides an easy to use list of directories.
   * - uses cdn versions of jquery and spin.js.
+  * - works on most newish versions of webkit, ff, ie.
   */
   header("Content-Type: text/html; charset=utf-8");
 
@@ -47,238 +48,239 @@
 <title>albums</title>
 
 <style type="text/css">
-    body > * {
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      -khtml-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-      cursor: default;
-    }
+  body > * {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: default;
+  }
 
-    body {
-      font-family: sans-serif;
-      background-color: rgb(46, 46, 46);
-    }
+  body {
+    font-family: sans-serif;
+    background-color: rgb(46, 46, 46);
+  }
 
-    a {
-      outline: 0;
-    }
+  a {
+    outline: 0;
+  }
 
-    .main {
-      position: absolute;
-      left: 210px;
-      top: 20px;
-      right: 20px;
-      bottom: 20px;
-      background-color: rgb(64, 64, 64);
-      border: 1px solid rgb(32, 32, 32);
-      -webkit-box-shadow: 0 0 15px #222;
-      -moz-box-shadow: 0 0 15px #222;
-      box-shadow: 0 0 15px #222;
-    }
+  .main {
+    position: absolute;
+    left: 210px;
+    top: 20px;
+    right: 20px;
+    bottom: 20px;
+    background-color: rgb(64, 64, 64);
+    border: 1px solid rgb(32, 32, 32);
+    -webkit-box-shadow: 0 0 15px #222;
+    -moz-box-shadow: 0 0 15px #222;
+    box-shadow: 0 0 15px #222;
+  }
 
-    .left {
-      position: absolute;
-      left: 10px;
-      top: 10px;
-      bottom: 20px;
-      width: 180px;
-      padding-left: 10px;
-      padding-top: 10px;
-      overflow-x: hidden;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-    }
+  .left {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    bottom: 20px;
+    width: 180px;
+    padding-left: 10px;
+    padding-top: 10px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 
-    ul, li {
-      margin: 0;
-      padding: 0;
-      padding-bottom: 6px;
-      list-style-type: none;
-    }
+  ul, li {
+    margin: 0;
+    padding: 0;
+    padding-bottom: 6px;
+    list-style-type: none;
+  }
 
-    a:active { /* ie draws a grey background by default */
-      background-color: transparent;
-    }
+  a:active { /* ie draws a grey background by default */
+    background-color: transparent;
+  }
 
-    .item a {
-      color: #aaa;
-      font-size: 12px;
-      text-decoration: none;
-    }
+  .item a {
+    color: #aaa;
+    font-size: 12px;
+    text-decoration: none;
+  }
 
-    .item.active a,
-    .item.active a:hover {
-      color: #eee;
-      text-shadow: 1px 1px 6px #111;
-      font-weight: bold;
-      text-decoration: underline;
-    }
+  .item.active a,
+  .item.active a:hover {
+    color: #eee;
+    text-shadow: 1px 1px 6px #111;
+    font-weight: bold;
+    text-decoration: underline;
+  }
 
-    .item a:hover {
-      color: #ddd;
-      text-decoration: underline;
-      cursor: pointer;
-    }
+  .item a:hover {
+    color: #ddd;
+    text-decoration: underline;
+    cursor: pointer;
+  }
 
-    .title {
-      font-weight: bold;
-      font-size: 24px;
-      color: #666;
-      text-shadow: 0 0 8px #222;
-      text-decoration: underline;
-      padding-bottom: 4px;
-    }
+  .title {
+    font-weight: bold;
+    font-size: 24px;
+    color: #666;
+    text-shadow: 0 0 8px #222;
+    text-decoration: underline;
+    padding-bottom: 4px;
+  }
 
-    .albums {
-      display: block;
-    }
+  .albums {
+    display: block;
+  }
 
-    .hidden {
-      display: none;
-    }
+  .hidden {
+    display: none;
+  }
 
-    .date {
-      font-size: 60%;
-      color: #666;
-    }
+  .date {
+    font-size: 60%;
+    color: #666;
+  }
 
-    .album-list {
-      padding-left: 0px;
-    }
+  .album-list {
+    padding-left: 0px;
+  }
 
-    .footer {
-      position: absolute;
-      text-align: center;
-      line-height: 1.2em;
-      left: 210px;
-      right: 0;
-      bottom: 0;
-      height: 20px;
-    }
+  .footer {
+    position: absolute;
+    text-align: center;
+    line-height: 1.2em;
+    left: 210px;
+    right: 0;
+    bottom: 0;
+    height: 20px;
+  }
 
-    .footer a {
-      color: #666;
-      font-size: 11px;
-      text-decoration: none;
-    }
+  .footer a {
+    color: #666;
+    font-size: 11px;
+    text-decoration: none;
+  }
 
-    .footer a:hover {
-      color: #bbb;
-      text-shadow: 0 0 3px #000;
-      text-decoration: underline;
-    }
+  .footer a:hover {
+    color: #bbb;
+    text-shadow: 0 0 3px #000;
+    text-decoration: underline;
+  }
 
-    .embedded {
-      display: block;
-      width: 100%;
-      height: 100%;
-      border: 0;
-    }
+  .embedded {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
 
-    .arrow {
-      color: #ccc;
-      font-weight: bold;
-    }
+  .arrow {
+    color: #ccc;
+    font-weight: bold;
+  }
 
-    .loading .embedded {
-      display: none;
-    }
+  .loading .embedded {
+    display: none;
+  }
 
-    .spinner-container {
-      display: none;
-      position: absolute;
-      width: 64px;
-      height: 64px;
-      top: 50%;
-      left: 50%;
-      margin-top: -32px; /* height / 2 */
-      margin-left: -32px; /* width / 2 */
-    }
+  .spinner-container {
+    display: none;
+    position: absolute;
+    width: 64px;
+    height: 64px;
+    top: 50%;
+    left: 50%;
+    margin-top: -32px; /* height / 2 */
+    margin-left: -32px; /* width / 2 */
+  }
 
-    .no-albums.visible {
-      display: block;
-    }
+  .no-albums.visible {
+    display: block;
+  }
 
-    .no-albums {
-      display: none;
-      position: absolute;
-      height: 1.2em;
-      top: 50%;
-      margin-top: -0.6em; /* height / 2 */
-      left: 0;
-      right: 0;
-      text-align: center;
-      color: #bbb;
-      text-shadow: 0 0 8px #222;
-    }
+  .no-albums {
+    display: none;
+    position: absolute;
+    height: 1.2em;
+    top: 50%;
+    margin-top: -0.6em; /* height / 2 */
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: #bbb;
+    text-shadow: 0 0 8px #222;
+  }
 
-    .no-albums .no-albums,
-    .no-albums .spinner-container,
-    .loading .spinner-container {
-      display: block;
-    }
+  .no-albums .no-albums,
+  .no-albums .spinner-container,
+  .loading .spinner-container {
+    display: block;
+  }
 
-    .back {
-      display: none;
-      padding: 5px 8px;
-      padding-right: 10px;
-      border-radius: 4px;
-      background-color: #444;
-      margin-bottom: 8px;
-      color: #aaa;
-      font-size: 12px;
-      -webkit-box-shadow: 0 0 5px #222;
-      -moz-box-shadow: 0 0 5px #222;
-      box-shadow: 0 0 5px #222;
-      margin-top: 6px;
-    }
+  .back {
+    display: none;
+    padding: 5px 8px;
+    padding-right: 10px;
+    border-radius: 4px;
+    background-color: #444;
+    margin-bottom: 8px;
+    color: #aaa;
+    font-size: 12px;
+    -webkit-box-shadow: 0 0 5px #222;
+    -moz-box-shadow: 0 0 5px #222;
+    box-shadow: 0 0 5px #222;
+    margin-top: 6px;
+  }
 
-    .back.show {
-      display: inline-block;
-    }
+  .back.show {
+    display: inline-block;
+  }
 
-    .back:hover {
-      background-color: #4c4c4c;
-      color: #ccc;
-      text-decoration: underline;
-      cursor: pointer;
-    }
+  .back:hover {
+    background-color: #4c4c4c;
+    color: #ccc;
+    text-decoration: underline;
+    cursor: pointer;
+  }
 
-    ::-webkit-scrollbar {
-        height: 9px;
-        width: 9px;
-        border-radius: 8px;
-        background: transparent;
-        margin-bottom: 4px;
-    }
+  ::-webkit-scrollbar {
+    height: 9px;
+    width: 9px;
+    border-radius: 8px;
+    background: transparent;
+    margin-bottom: 4px;
+  }
 
-    ::-webkit-scrollbar-thumb {
-        background: #666;
-        border: 1px solid #111;
-        border-radius: 6px;
-    }
+  ::-webkit-scrollbar-thumb {
+    background: #666;
+    border: 1px solid #111;
+    border-radius: 6px;
+  }
 
-    ::-webkit-scrollbar-thumb:hover {
-        background: #bbb;
-    }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #bbb;
+  }
 
-    ::-webkit-scrollbar-corner {
-        background: #000;
-    }
+  ::-webkit-scrollbar-corner {
+    background: #000;
+  }
 
-    ::-webkit-scrollbar-track-piece {
-        border-top: 1px solid black;
-        background-color: rgba(0, 0, 0, 0.2);
-    }
+  ::-webkit-scrollbar-track-piece {
+    border-top: 1px solid black;
+    background-color: rgba(0, 0, 0, 0.2);
+  }
 </style>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/spin.js/1.2.7/spin.min.js"></script>
 
 <script type="text/javascript">
+  (function() {
     /* YYYY-MM-DD or YYYY-MM */
     var SIMPLE_DATE_REGEX = /^\d{4}-\d{2}(-\d{2})?$/;
 
@@ -336,20 +338,20 @@
     var model = createDataModel();
 
     function parseQueryParams() {
-        var result = { };
+      var result = { };
 
-        var query = window.location.search;
-        if (query && query[0] === '?') {
-            var parts = query.substring(1).split('&'), keyValue;
-            for (var i = 0; i < parts.length; i++) {
-                keyValue = parts[i].split('=');
-                if (keyValue.length === 2) {
-                    result[keyValue[0]] = decodeURIComponent(keyValue[1]);
-                }
-            }
+      var query = window.location.search;
+      if (query && query[0] === '?') {
+        var parts = query.substring(1).split('&'), keyValue;
+        for (var i = 0; i < parts.length; i++) {
+          keyValue = parts[i].split('=');
+          if (keyValue.length === 2) {
+            result[keyValue[0]] = decodeURIComponent(keyValue[1]);
+          }
         }
+      }
 
-        return result;
+      return result;
     }
 
     /* merges and sorts the different types of albums we support */
@@ -574,313 +576,314 @@
     }
 
     $(document).ready(function() {
-        var $iframe = null;
-        var $main = $('.main');
-        var $spinnerContainer = $('.spinner-container');
-        var spinner = new Spinner(SPINNER_OPTIONS);
-        var albumLoading = false;
+      var $iframe = null;
+      var $main = $('.main');
+      var $spinnerContainer = $('.spinner-container');
+      var spinner = new Spinner(SPINNER_OPTIONS);
+      var albumLoading = false;
 
-        var hashPollInterval;
+      var hashPollInterval;
 
-        $(window).on('message', function(event) {
-          event = event.originalEvent || event;
+      $(window).on('message', function(event) {
+        event = event.originalEvent || event;
 
-          var data = event.data;
-          if (data) {
-            switch (data.message) {
-              case 'hashChanged':
-                if (currentAlbum) {
-                  /* here the image has already updated internally, so we want
-                  to just write the hash without triggering a message back to
-                  the embedded gallery. stop polling, update, resume polling */
-                  pollHash(false);
-                  var hash = data.options.hash;
-                  writeHash(currentAlbum + "/" + hash);
-                  setSelectedImageForAlbum(currentAlbum, hash);
-                  updateBackgroundColor();
-                  pollHash();
-                }
-                break;
+        var data = event.data;
+        if (data) {
+          switch (data.message) {
+            case 'hashChanged':
+              if (currentAlbum) {
+                /* here the image has already updated internally, so we want
+                to just write the hash without triggering a message back to
+                the embedded gallery. stop polling, update, resume polling */
+                pollHash(false);
+                var hash = data.options.hash;
+                writeHash(currentAlbum + "/" + hash);
+                setSelectedImageForAlbum(currentAlbum, hash);
+                updateBackgroundColor();
+                pollHash();
+              }
+              break;
 
-              case 'prevAlbum': selectPrevAlbum(); break;
-              case 'nextAlbum': selectNextAlbum(); break;
+            case 'prevAlbum': selectPrevAlbum(); break;
+            case 'nextAlbum': selectNextAlbum(); break;
+          }
+        }
+      });
+
+      var post = function(name, options) {
+          var el = $iframe.get(0);
+          if (el && el.contentWindow && el.contentWindow.postMessage) {
+            var msg  = { message: name, options: options || { } };
+            el.contentWindow.postMessage(msg, "*");
+          }
+      };
+
+      var setLoading = function(loading) {
+        loading = (loading === undefined) ? true : loading;
+
+        if (loading === albumLoading) {
+          return;
+        }
+
+        if (loading) {
+          albumLoading = true;
+          $main.addClass('loading');
+          spinner.spin($spinnerContainer[0]);
+        }
+        else {
+          albumLoading = false;
+          $main.removeClass('loading');
+          spinner.stop();
+        }
+      };
+
+      /* if we don't destroy then re-create the iframe every time the album
+      switches, its history gets updated and corrupts our backstack */
+      resetIFrame = function(url) {
+        if ($iframe) {
+          $iframe.remove();
+        }
+
+        $iframe = $('<iframe class="embedded"></iframe>');
+        $('.main').append($iframe);
+
+        /* NOTE: if we set the source asynchronously, e.g. in the setTimeout
+        just below, it will mess up our back stack in chrome. basically, when
+        the user presses back the iframe will move back, instead of the outer
+        frame */
+        $iframe.attr('src', url);
+
+        setTimeout(function() {
+          /* setting src isn't good enough. in some browsers (older firefox,
+          newer chrome), navigating forward (e.g. to an album series), then back
+          will cause the wrong iframe url to be loaded. solution was found:
+          http://stackoverflow.com/questions/2648053/preventing-iframe-caching-in-browser */
+          $iframe[0].contentWindow.location.href.replace(url);
+        });
+      };
+
+      var select = function(index) {
+        var currentHashPath; /* only set if index is typeof string */
+
+        var firstAlbumIndex = model.first('album');
+        index = index || firstAlbumIndex;
+
+        if (typeof index === 'string') {
+          if (index.charAt(0) === '#') {
+            index = index.substring(1);
+          }
+
+          var parts = index.split('/');
+          index = parts[0];
+          currentHashPath = parts[1];
+
+          index = Math.max(firstAlbumIndex, model.find(index, 'album'));
+        }
+
+        var album = model[index].name;
+        if (album === currentAlbum) {
+          var lastHashPath = (lastHash || "").split("/")[1];
+          if (lastHashPath !== currentHashPath) {
+            /* album is the same, but the image changed. user probably pressed
+            the back button, so let the current album know */
+            post('changeHash', {hash: currentHashPath});
+          }
+        }
+        else {
+          /* mark active state */
+          var $items = $('.album-list .item');
+          $items.removeClass('active');
+          $items.eq(index).addClass('active');
+
+          /* load */
+          setLoading(true);
+          resetIFrame(urlAtIndex(index, currentHashPath));
+
+          /* avoid white flash by hiding the iframe for a short
+          period of time */
+          $iframe.one('load', function() {
+            setLoading(false);
+          });
+
+          currentAlbum = model[index].name;
+
+          /* write it back to the url */
+          finalHashPath = currentHashPath || "";
+          /* needs leading path char */
+          if (finalHashPath.length && finalHashPath.charAt(0) !== "/") {
+            finalHashPath = "/" + finalHashPath;
+          }
+
+          writeHash(model[index].name + finalHashPath);
+        }
+      };
+
+      /* things like back button change the hash without us knowing,
+      so we need to monitor for changes. ugh. */
+      var pollHash = function(poll) {
+        if (poll === false) {
+          clearInterval(hashPollInterval);
+          hashPollInterval = undefined;
+        }
+        else if (!hashPollInterval) {
+          hashPollInterval = setInterval(function() {
+            var currentHash = getHashFromUrl();
+            if (currentHash !== lastHash) {
+              select(currentHash);
+              lastHash = currentHash;
             }
+          }, 250);
+        }
+      };
+
+      var getSelectedIndex = function() {
+        var $el = $('.album-list .active a');
+
+        if ($el.length === 1) {
+          return parseInt($el.eq(0).attr("data-index"), 10);
+        }
+
+        return 0;
+      };
+
+      var selectNextAlbum = function() {
+        select(model.adjacent(getSelectedIndex(), 'album'));
+      };
+
+      var selectPrevAlbum = function() {
+        select(model.adjacent(getSelectedIndex(), 'album', {reverse: true}));
+      };
+
+      var scrollToSelectedAlbum = function() {
+        var $active = $('li.item.active');
+        if ($active.length) {
+          var pos = $active.position().top;
+          $('.album-list').animate({scrollTop: pos});
+        }
+      };
+
+      var initEventListeners = function() {
+        $('.embedded').on('load', function() {
+          $('.embedded').removeClass('hidden');
+        });
+
+        /* links in a album list open in the iframe. override the default
+        action so url can still be right clicked and deep linked */
+        $('.album-list').on('click', 'a', function(event) {
+          event.preventDefault();
+          var $el = $(event.currentTarget);
+          var index = parseInt($el.attr("data-index"), 10) || 0;
+
+          if (model[index].type === 'album') {
+            select(index);
+          }
+          else if (model[index].type === 'series') {
+            var url = $(event.currentTarget).attr('href');
+            url += '#back:' + encodeURIComponent(getHashFromUrl());
+            window.location.href = url;
           }
         });
 
-        var post = function(name, options) {
-            var el = $iframe.get(0);
-            if (el && el.contentWindow && el.contentWindow.postMessage) {
-              var msg  = { message: name, options: options || { } };
-              el.contentWindow.postMessage(msg, "*");
-            }
-        };
+        /* override default back behavior so we can add the back hash if
+        we have one. maintains right click -> copy url functionality */
+        $('.back').on('click', function(event) {
+          event.preventDefault();
+          var url = $(event.currentTarget).attr('href');
+          url += backHash || '';
+          window.location.href = url;
+        });
 
-        var setLoading = function(loading) {
-          loading = (loading === undefined) ? true : loading;
-
-          if (loading === albumLoading) {
-            return;
-          }
-
-          if (loading) {
-            albumLoading = true;
-            $main.addClass('loading');
-            spinner.spin($spinnerContainer[0]);
-          }
-          else {
-            albumLoading = false;
-            $main.removeClass('loading');
-            spinner.stop();
-          }
-        };
-
-        /* if we don't destroy then re-create the iframe every time the album
-        switches, its history gets updated and corrupts our backstack */
-        resetIFrame = function(url) {
-          if ($iframe) {
-            $iframe.remove();
-          }
-
-          $iframe = $('<iframe class="embedded"></iframe>');
-          $('.main').append($iframe);
-
-          /* NOTE: if we set the source asynchronously, e.g. in the setTimeout
-          just below, it will mess up our back stack in chrome. basically, when
-          the user presses back the iframe will move back, instead of the outer
-          frame */
-          $iframe.attr('src', url);
-
-          setTimeout(function() {
-            /* setting src isn't good enough. in some browsers (older firefox,
-            newer chrome), navigating forward (e.g. to an album series), then back
-            will cause the wrong iframe url to be loaded. solution was found:
-            http://stackoverflow.com/questions/2648053/preventing-iframe-caching-in-browser */
-            $iframe[0].contentWindow.location.href.replace(url);
-          });
-        };
-
-        var select = function(index) {
-          var currentHashPath; /* only set if index is typeof string */
-
-          var firstAlbumIndex = model.first('album');
-          index = index || firstAlbumIndex;
-
-          if (typeof index === 'string') {
-            if (index.charAt(0) === '#') {
-              index = index.substring(1);
+        $("body").on("keydown", function(event) {
+            if (event.altKey || event.metaKey) {
+                return true; /* don't swallow browser back/forward shortcuts */
             }
 
-            var parts = index.split('/');
-            index = parts[0];
-            currentHashPath = parts[1];
-
-            index = Math.max(firstAlbumIndex, model.find(index, 'album'));
-          }
-
-          var album = model[index].name;
-          if (album === currentAlbum) {
-            var lastHashPath = (lastHash || "").split("/")[1];
-            if (lastHashPath !== currentHashPath) {
-              /* album is the same, but the image changed. user probably pressed
-              the back button, so let the current album know */
-              post('changeHash', {hash: currentHashPath});
+            switch (event.keyCode) {
+              case 37: post('prev'); break;
+              case 38: selectPrevAlbum(); break;
+              case 39: post('next'); break;
+              case 40: selectNextAlbum(); break;
             }
-          }
-          else {
-            /* mark active state */
-            var $items = $('.album-list .item');
-            $items.removeClass('active');
-            $items.eq(index).addClass('active');
+        });
+      };
 
-            /* load */
-            setLoading(true);
-            resetIFrame(urlAtIndex(index, currentHashPath));
-
-            /* avoid white flash by hiding the iframe for a short
-            period of time */
-            $iframe.one('load', function() {
-              setLoading(false);
-            });
-
-            currentAlbum = model[index].name;
-
-            /* write it back to the url */
-            finalHashPath = currentHashPath || "";
-            /* needs leading path char */
-            if (finalHashPath.length && finalHashPath.charAt(0) !== "/") {
-              finalHashPath = "/" + finalHashPath;
-            }
-
-            writeHash(model[index].name + finalHashPath);
-          }
-        };
-
-        /* things like back button change the hash without us knowing,
-        so we need to monitor for changes. ugh. */
-        var pollHash = function(poll) {
-          if (poll === false) {
-            clearInterval(hashPollInterval);
-            hashPollInterval = undefined;
-          }
-          else if (!hashPollInterval) {
-            hashPollInterval = setInterval(function() {
-              var currentHash = getHashFromUrl();
-              if (currentHash !== lastHash) {
-                select(currentHash);
-                lastHash = currentHash;
-              }
-            }, 250);
-          }
-        };
-
-        var getSelectedIndex = function() {
-          var $el = $('.album-list .active a');
-
-          if ($el.length === 1) {
-            return parseInt($el.eq(0).attr("data-index"), 10);
-          }
-
-          return 0;
-        };
-
-        var selectNextAlbum = function() {
-          select(model.adjacent(getSelectedIndex(), 'album'));
-        };
-
-        var selectPrevAlbum = function() {
-          select(model.adjacent(getSelectedIndex(), 'album', {reverse: true}));
-        };
-
-        var scrollToSelectedAlbum = function() {
-          var $active = $('li.item.active');
-          if ($active.length) {
-            var pos = $active.position().top;
-            $('.album-list').animate({scrollTop: pos});
-          }
-        };
-
-        var initEventListeners = function() {
-          $('.embedded').on('load', function() {
-            $('.embedded').removeClass('hidden');
-          });
-
-          /* links in a album list open in the iframe. override the default
-          action so url can still be right clicked and deep linked */
-          $('.album-list').on('click', 'a', function(event) {
-            event.preventDefault();
-            var $el = $(event.currentTarget);
-            var index = parseInt($el.attr("data-index"), 10) || 0;
-
-            if (model[index].type === 'album') {
-              select(index);
-            }
-            else if (model[index].type === 'series') {
-              var url = $(event.currentTarget).attr('href');
-              url += '#back:' + encodeURIComponent(getHashFromUrl());
-              window.location.href = url;
-            }
-          });
-
-          /* override default back behavior so we can add the back hash if
-          we have one. maintains right click -> copy url functionality */
-          $('.back').on('click', function(event) {
-            event.preventDefault();
-            var url = $(event.currentTarget).attr('href');
-            url += backHash || '';
-            window.location.href = url;
-          });
-
-          $("body").on("keydown", function(event) {
-              if (event.altKey || event.metaKey) {
-                  return true; /* don't swallow browser back/forward shortcuts */
-              }
-
-              switch (event.keyCode) {
-                case 37: post('prev'); break;
-                case 38: selectPrevAlbum(); break;
-                case 39: post('next'); break;
-                case 40: selectNextAlbum(); break;
-              }
-          });
-        };
-
-        var getBackBaseUrl = function() {
-            var path = window.location.pathname.split('/');
-            while (path.length) {
-              if (path.pop() !== '') {
-                break;
-              }
-            }
-
-            return path.join('/');
-        };
-
-        var render = function() {
-          /* generate album list, add to DOM */
-          var $albumList = $(".album-list");
-          var item, caption, parts, template, html;
-          for (i = 0; i < model.length; i++) {
-              item = model[i];
-              caption = item.name.replace(/_/g, " ");
-              parts = parseListItem(caption);
-
-              if (item.type === 'album') {
-                template = parts.date ?
-                  LIST_ITEM_TEMPLATE_WITH_DATE : LIST_ITEM_TEMPLATE;
-
-                html = template
-                  .replace("{{url}}", item.name)
-                  .replace("{{caption}}", parts.caption)
-                  .replace("{{index}}", i)
-                  .replace("{{date}}", parts.date);
-              }
-              else if (item.type === 'series') {
-                template = LIST_ITEM_SERIES_TEMPLATE;
-
-                html = template
-                  .replace("{{url}}", item.name + "?b=1")
-                  .replace("{{caption}}", parts.caption)
-                  .replace("{{index}}", i);
-              }
-
-              $albumList.append(html);
-          }
-
-          var initialHash = getHashFromUrl() || '';
-
-          /* we were given a back route, parse it out */
-          if (initialHash.indexOf("#back:") === 0) {
-            backHash = decodeURIComponent(initialHash.split(":")[1]);
-          }
-
-          /* if we have ?b=1 or a #back: route show the back button. if we
-          only have ?b=1 then the previously selected image will not be
-          displayed. also, doing this users can still deep link to a nested
-          series without an excessively long url */
-          if (backHash || query.b) {
-            var backUrl = getBackBaseUrl();
-            $('.back').addClass('show');
-            $('.back').attr('href', backUrl + '/');
-
-            /* make things a bit more user friendly if we can figure out the
-            name of the series we want to go back to */
-            var prevPath = backUrl.split("/").pop();
-            if (prevPath) {
-              $('.back .back-text').text('back to ' + prevPath.replace(/_/g, " "));
+      var getBackBaseUrl = function() {
+          var path = window.location.pathname.split('/');
+          while (path.length) {
+            if (path.pop() !== '') {
+              break;
             }
           }
 
-          $('.no-albums').toggleClass('visible', (ALBUMS.length <= 0));
+          return path.join('/');
+      };
 
-          select(getHashFromUrl());
-          scrollToSelectedAlbum();
-          pollHash();
-        };
+      var render = function() {
+        /* generate album list, add to DOM */
+        var $albumList = $(".album-list");
+        var item, caption, parts, template, html;
+        for (i = 0; i < model.length; i++) {
+            item = model[i];
+            caption = item.name.replace(/_/g, " ");
+            parts = parseListItem(caption);
 
-        initEventListeners();
-        render();
+            if (item.type === 'album') {
+              template = parts.date ?
+                LIST_ITEM_TEMPLATE_WITH_DATE : LIST_ITEM_TEMPLATE;
+
+              html = template
+                .replace("{{url}}", item.name)
+                .replace("{{caption}}", parts.caption)
+                .replace("{{index}}", i)
+                .replace("{{date}}", parts.date);
+            }
+            else if (item.type === 'series') {
+              template = LIST_ITEM_SERIES_TEMPLATE;
+
+              html = template
+                .replace("{{url}}", item.name + "?b=1")
+                .replace("{{caption}}", parts.caption)
+                .replace("{{index}}", i);
+            }
+
+            $albumList.append(html);
+        }
+
+        var initialHash = getHashFromUrl() || '';
+
+        /* we were given a back route, parse it out */
+        if (initialHash.indexOf("#back:") === 0) {
+          backHash = decodeURIComponent(initialHash.split(":")[1]);
+        }
+
+        /* if we have ?b=1 or a #back: route show the back button. if we
+        only have ?b=1 then the previously selected image will not be
+        displayed. also, doing this users can still deep link to a nested
+        series without an excessively long url */
+        if (backHash || query.b) {
+          var backUrl = getBackBaseUrl();
+          $('.back').addClass('show');
+          $('.back').attr('href', backUrl + '/');
+
+          /* make things a bit more user friendly if we can figure out the
+          name of the series we want to go back to */
+          var prevPath = backUrl.split("/").pop();
+          if (prevPath) {
+            $('.back .back-text').text('back to ' + prevPath.replace(/_/g, " "));
+          }
+        }
+
+        $('.no-albums').toggleClass('visible', (ALBUMS.length <= 0));
+
+        select(getHashFromUrl());
+        scrollToSelectedAlbum();
+        pollHash();
+      };
+
+      initEventListeners();
+      render();
     });
+  }());
 </script>
 
 </head>
