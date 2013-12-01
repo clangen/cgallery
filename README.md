@@ -4,7 +4,7 @@ cgallery
 
 cgallery is written in less than 2000 lines of php+js+css+html, and uses jquery and spin.js. the most basic use case requires no configuration: just drop **album.php** in a directory and go.
 
-more advanced use cases are also supported: **series.php** may be used to index a directory that contains a set of albums, indexed with album.php. series may also contain other series. series.php supports minimal configuration: sub-directories may be excluded from the index by placing an empty file in the undesired directory called **.hidden**. series may also contain other series, by placing an empty file called **.series** in the target directory.
+more advanced use cases are also supported: **series.php** may be used to index a directory that contains a set of albums, indexed with album.php. series.php supports minimal configuration: sub-directories may be excluded by placing an empty file called **.hidden** in the undesired directory. a series may also contain other series, which will be detected during the index process by the existance of an empty file called **.series** in the target directory.
 
 cgallery also supports keyboard navigation and deep-linkable urls.
 
