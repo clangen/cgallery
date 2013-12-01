@@ -2,7 +2,13 @@ cgallery
 =========
 **a simple photo management system** that works well with webkit, gecko, and ie10+.
 
-cgallery is written in less than 2000 lines of php+js+css+html, and uses jquery and spin.js. the most basic use case requires no configuration: just drop **album.php** in a directory and go. 
+cgallery is written in less than 2000 lines of php+js+css+html, and uses jquery and spin.js. the most basic use case requires no configuration: just drop **album.php** in a directory and go.
+
+more advanced use cases are also supported: **series.php** may be used to index a directory that contains a set of albums, indexed with album.php. series may also contain other series. series.php supports minimal configuration: sub-directories may be excluded from the index by placing an empty file in the undesired directory called **.hidden**. series may also contain other series, by placing an empty file called **.series** in the target directory.
+
+cgallery also supports keyboard navigation and deep-linkable urls.
+
+[try out a demo here.](http://casey.io/cgallery/demo)
 
 ####cgallery requires:
 * a **web server** with **php** and the **gd** image library
@@ -23,7 +29,7 @@ git clone git@bitbucket.org:clangen/cgallery.git
 * indexes a single album (defined by a directory of images)
 * uses php to scan directory and generate thumbnails -- optionally on the fly
 
-here's an example. let's say you have a directory full of images called *my_album_2013-09*
+for example: let's say you have a directory full of images called *my_album_2013-09*
 ```sh
 cd my_album_2013-09
 ln -s ~/src/cgallery/album.php ./index.php
