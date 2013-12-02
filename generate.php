@@ -1,15 +1,16 @@
 <?php
   /*
    * this is a simple, command-line php file that can be used to generate
-   * a static gallery. this is useful if you're serving lots of traffic,
-   * and don't want php to scan the filesystem for each request. works
-   * recursively.
+   * albums and series based on directory structure. this is especially
+   * useful if you're serving lots of traffic and don't want php to scan
+   * the filesystem for updated images on each request. the basic logic
+   * is as follows:
    *
    * arguments:
-   *   --cgallery=/path/to/cgallery (i.e. where album.php and series.php live)
-   *   --path=/path/to/images
-   *   --clean=true|false (if true, thumbnails will be regenerated)
-   *   --mode=static|dynamic (static is default, dynamic will symlink php files)
+   *   --cgallery=/path/to/cgallery : where album.php and series.php live
+   *   --path=/path/to/images       : location of root directory that should be indexed
+   *   --regen=true|false           : if true, thumbnails will be deleted, then re-created
+   *   --mode=static|dynamic        : static means generic static html, dynamic will symlink php files
    */
 
   /* ugh, http://stackoverflow.com/questions/1091107/how-to-join-filesystem-path-strings-in-php */
@@ -42,7 +43,7 @@
     $php = path($dir, "index.php");
     $thumbs = path($dir, ".thumbs");
     global $album;
-    global $clean;
+    global $regen;
     global $mode;
 
     $oldcwd = getcwd();
@@ -50,8 +51,8 @@
     check_rm($html);
     check_rm($php);
 
-    if ($clean && is_dir($thumbs)) {
-      print "  cleaning thumbnails\n";
+    if ($regen && is_dir($thumbs)) {
+      print "  re-generating thumbnails\n";
       chdir($thumbs);
 
       foreach (glob("*.jpg") as $thumb) {
@@ -82,7 +83,7 @@
     $html = path($dir, "index.html");
     $php = path($dir, "index.php");
     global $series;
-    global $clean;
+    global $regen;
     global $mode;
 
     $oldcwd = getcwd();
@@ -131,7 +132,7 @@
   $keys = array(
     "cgallery:",  /* not required: default=cwd */
     "path:",      /* required: path to photo directory tree */
-    "clean:",     /* not required. if true, will re-generate thumbnails */
+    "regen:",     /* not required. if true, will re-generate thumbnails */
     "mode:"       /* not required. values=(static, dynamic). default=static */
   );
 
@@ -139,7 +140,7 @@
 
   /* resolve working paths */
   $src = realpath($options["cgallery"] ?: ".");
-  $clean = $options["clean"] == "true";
+  $regen = $options["regen"] == "true";
   $path = resolve(realpath($options["path"]));
   $mode = $options["mode"] == "dynamic" ? "dynamic" : "static";
 
@@ -147,7 +148,7 @@
   print "configuration:\n";
   print "  cgallery path: " . $src . "\n";
   print "  directory to index: " . $path . "\n";
-  print "  clean: " . ($clean ? "true" : "false") . "\n";
+  print "  regen: " . ($regen ? "true" : "false") . "\n";
   print "  mode: " . $mode . "\n";
   print "\n";
 
@@ -160,7 +161,7 @@
   }
 
   if (!is_dir($path)) {
-    print("ERROR: specified path $PATH does not appear to be a directory");
+    print("ERROR: specified path $path does not appear to be a directory");
     exit(1);
   }
 
