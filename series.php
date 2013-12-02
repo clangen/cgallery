@@ -1,7 +1,7 @@
 <?php /** series.php **/
   /*
   * cgallery v2.1
-  * 
+  *
   * series.php:
   * - indexes a directory of albums and other series.
   * - output is a client-side webapp (a single html file).
@@ -554,10 +554,13 @@
         port = "";
       }
 
+      /* strip filename, if one exists (e.g. index.php) */
+      var path = window.location.pathname.replace(/[^\/]*$/, '');
+
       var result =
         window.location.protocol + '//' +
         window.location.hostname + port +
-        window.location.pathname + album +
+        path + album +
         "#" + selected + getBackgroundColor();
 
       return result;
