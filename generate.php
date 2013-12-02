@@ -7,13 +7,23 @@
    * is as follows:
    *
    * arguments:
-   *   --cgallery=/path/to/cgallery : where album.php and series.php live
-   *   --path=/path/to/images       : location of root directory that should be indexed
-   *   --regen=true|false           : if true, thumbnails will be deleted, then re-created
+   *   --src=/path/to/cgallery/src  : where album.php and series.php live. default=cwd
+   *   --dst=/path/to/images/dir    : location of root directory that should be indexed. required.
+   *   --rethumb=true|false         : if true, thumbnails will be deleted, then re-created. optional.
    *   --mode=static|dynamic        : static means generic static html, dynamic will symlink php files
    */
 
-  /* ugh, http://stackoverflow.com/questions/1091107/how-to-join-filesystem-path-strings-in-php */
+  function err($msg, $code = 999) {
+    print "\n  * $msg *\n\naborted.\n\n";
+    exit($code);
+  }
+
+  function fin() {
+    print("\nfinished\n\n");
+  }
+
+  /* ugh, http://stackoverflow.com/questions/1091107/how-to-join-filesystem-path-strings-in-php.
+  this is a path join function, it will basically trim up and slash delimit the argv */
   function path() {
     return preg_replace('~[/\\\]+~', DIRECTORY_SEPARATOR, implode(DIRECTORY_SEPARATOR, array_filter(func_get_args(), function($p) {
       return $p !== '';
@@ -27,6 +37,10 @@
       $path = readlink($path);
     }
     return $path;
+  }
+
+  function strip($str) {
+    return trim(preg_replace('/\s\s+/', ' ', $str));
   }
 
   function check_rm($file) {
@@ -43,7 +57,7 @@
     $php = path($dir, "index.php");
     $thumbs = path($dir, ".thumbs");
     global $album;
-    global $regen;
+    global $rethumb;
     global $mode;
 
     $oldcwd = getcwd();
@@ -51,30 +65,31 @@
     check_rm($html);
     check_rm($php);
 
-    if ($regen && is_dir($thumbs)) {
+    if ($rethumb && is_dir($thumbs)) {
       print "  re-generating thumbnails\n";
       chdir($thumbs);
 
       foreach (glob("*.jpg") as $thumb) {
-          unlink($thumb);
+          check_rm($thumb);
       }
     }
 
     chdir($dir);
 
     if ($mode == "static") {
-      print "  generating thumbnails and index.html using album.php\n";
+      print "  generating thumbnails to $thumbs using $php\n";
+      print "    note: this will silently create missing thumbnails\n";
       exec("php $album > index.html");
     }
     else if ($mode == "dynamic") {
-      print "  generating thumbnails using album.php\n";
       exec("php $album");
-      print "  linking index.php to album.php\n";
+      print "  linking $album to $php\n";
+      print "    note: no thumbnails will be generated until the next page visit'\n";
       symlink($album, $php);
     }
 
     chdir($oldcwd);
-    print "  done\n\n";
+    print "  done.\n\n";
   }
 
   /* compile the specified directory as a series. will use series.php
@@ -83,23 +98,24 @@
     $html = path($dir, "index.html");
     $php = path($dir, "index.php");
     global $series;
-    global $regen;
+    global $rethumb;
     global $mode;
 
-    $oldcwd = getcwd();
+    $oldcwd = getcwd(); /* will restore at the end... */
 
     check_rm($html);
     check_rm($php);
 
     chdir($dir);
 
-    if ($mode == "static") {
+    if ($mode == "static") { /* generate a static html file. this
+      will implicitly trigger a thumbnail refresh */
       print "  generating index.html using series.php\n";
-      exec("php $series > index.html");
+      exec("php $series > index.html"); /* ugh, but it works and is easy */
       print "  done\n\n";
     }
     else if ($mode == "dynamic") {
-      print "  linking index.php to series.php\n";
+      print "  linking $series to $php\n";
       symlink($series, $php);
       print "  done\n\n";
     }
@@ -117,7 +133,7 @@
   function compile($dir) {
     $type = file_exists(path($dir, ".series")) ? "series" : "album";
 
-    print "processing: " . $dir . "\n";
+    print "compiling: " . $dir . "\n\n";
     print "  type: " . $type . "\n";
 
     if ($type == "series") {
@@ -130,41 +146,55 @@
 
   /* these are the input arguments we expect */
   $keys = array(
-    "cgallery:",  /* not required: default=cwd */
-    "path:",      /* required: path to photo directory tree */
-    "regen:",     /* not required. if true, will re-generate thumbnails */
-    "mode:"       /* not required. values=(static, dynamic). default=static */
+    "src:",     /* not required: default=cwd */
+    "dst:",     /* required: path to photo directory tree */
+    "rethumb:", /* not required. if true, will re-generate thumbnails */
+    "mode:"     /* not required. values=(static, dynamic). default=dynamic */
   );
 
   $options = getopt("", $keys);
 
   /* resolve working paths */
-  $src = realpath($options["cgallery"] ?: ".");
-  $regen = $options["regen"] == "true";
-  $path = resolve(realpath($options["path"]));
-  $mode = $options["mode"] == "dynamic" ? "dynamic" : "static";
+  $src = realpath($options["src"] ?: ".");
+  $rethumb = $options["rethumb"] == "true";
+  $dst = resolve(realpath($options["dst"]));
+  $mode = $options["mode"] == "static" ? "static" : "dynamic";
 
   /* show configuration to the user */
-  print "configuration:\n";
-  print "  cgallery path: " . $src . "\n";
-  print "  directory to index: " . $path . "\n";
-  print "  regen: " . ($regen ? "true" : "false") . "\n";
-  print "  mode: " . $mode . "\n";
-  print "\n";
+  print "\nbuild will use the following config:\n\n";
+  print "  src dir: " . $src . "\n";
+  print "  dst dir: " . $options["dst"] . "\n";
+  print "  re-generate thumbnails? " . ($rethumb ? "yes" : "nope") . "\n";
+  print "  mode: " . ($mode ? "static (generated html)" : "dynamic (refresh on load)") . "\n";
 
+  if (!$options["dst"]) {
+    err("ERROR: --dst= is required, please specify a target directory.");
+  }
+
+  print "\nconfirm? y/n ";
+
+  /* give the user a chance to back out */
+  $stdin = fopen('php://stdin', 'r');
+  $confirm = strip(fgets($stdin));
+
+  if ($confirm != "y") { /* must be exactly 'y' */
+    err("user canceled", 1);
+  }
+
+  print("\n");
+
+  /* check env */
   $album = resolve(path($src, "album.php"));
   $series = resolve(path($src, "series.php"));
 
-  if (!file_exists($album) || !file_exists($series)) {
-    print("ERROR: album.php or series.php not found in $src");
-    exit(1);
+  if (!file_exists($album) || !file_exists($series)) { /* src dir invalid */
+    err("ERROR: album.php or series.php not found in $src", 2);
   }
 
-  if (!is_dir($path)) {
-    print("ERROR: specified path $path does not appear to be a directory");
-    exit(1);
+  if (!is_dir($dst)) { /* target dir invalid */
+    err("ERROR: target path $dst does not appear to be a directory", 3);
   }
 
   /* kick the whole thing off! */
-  compile($path);
+  compile($dst);
 ?>
