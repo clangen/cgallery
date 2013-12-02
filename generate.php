@@ -9,6 +9,7 @@
    *   --cgallery=/path/to/cgallery (i.e. where album.php and series.php live)
    *   --path=/path/to/images
    *   --clean=true|false (if true, thumbnails will be regenerated)
+   *   --mode=static|dynamic (static is default, dynamic will symlink php files)
    */
 
   /* ugh, http://stackoverflow.com/questions/1091107/how-to-join-filesystem-path-strings-in-php */
