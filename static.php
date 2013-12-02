@@ -6,8 +6,8 @@
    * recursively.
    *
    * arguments:
-   *   --cgallery=/path/to/cgallery (i.e. where album.php and series.php live) 
-   *   --path=/path/to/images 
+   *   --cgallery=/path/to/cgallery (i.e. where album.php and series.php live)
+   *   --path=/path/to/images
    *   --clean=true|false (if true, thumbnails will be regenerated)
    */
 
@@ -27,20 +27,27 @@
     return $path;
   }
 
+  function check_rm($file) {
+    if (file_exists($file)) {
+      print "  deleting " . $file . "\n";
+      unlink($file);
+    }
+  }
+
   /* compile the specified directory as an album. will use album.php
   to generate a static index.html file */
   function compile_album($dir) {
     $html = path($dir, "index.html");
+    $php = path($dir, "index.php");
     $thumbs = path($dir, ".thumbs");
     global $album;
     global $clean;
+    global $mode;
 
     $oldcwd = getcwd();
 
-    if (file_exists($html)) {
-      print "  deleting old index.html\n";
-      unlink($html);
-    }
+    check_rm($html);
+    check_rm($php);
 
     if ($clean && is_dir($thumbs)) {
       print "  cleaning thumbnails\n";
@@ -52,8 +59,17 @@
     }
 
     chdir($dir);
-    print "  generating album\n";
-    exec("php $album > index.html");
+
+    if ($mode == "static") {
+      print "  generating thumbnails and index.html using album.php\n";
+      exec("php $album > index.html");
+    }
+    else if ($mode == "dynamic") {
+      print "  generating thumbnails using album.php\n";
+      exec("php $album");
+      print "  linking index.php to album.php\n";
+      symlink($album, $php);
+    }
 
     chdir($oldcwd);
     print "  done\n\n";
@@ -63,20 +79,28 @@
   to generate a static index.html file */
   function compile_series($dir) {
     $html = path($dir, "index.html");
+    $php = path($dir, "index.php");
     global $series;
     global $clean;
+    global $mode;
 
     $oldcwd = getcwd();
 
-    if (file_exists($html)) {
-      print "  deleting old index.html\n";
-      unlink($html);
-    }
+    check_rm($html);
+    check_rm($php);
 
     chdir($dir);
-    print "  generating series\n";
-    exec("php $series > index.html");
-    print "  done\n\n";
+
+    if ($mode == "static") {
+      print "  generating index.html using series.php\n";
+      exec("php $series > index.html");
+      print "  done\n\n";
+    }
+    else if ($mode == "dynamic") {
+      print "  linking index.php to series.php\n";
+      symlink($series, $php);
+      print "  done\n\n";
+    }
 
     /* compile each sub-directory. compile will figure out if the
     specified directory is an album or a nested series */
@@ -106,7 +130,8 @@
   $keys = array(
     "cgallery:",  /* not required: default=cwd */
     "path:",      /* required: path to photo directory tree */
-    "clean:"      /* not required. if true, will re-generate thumbnails */
+    "clean:",     /* not required. if true, will re-generate thumbnails */
+    "mode:"       /* not required. values=(static, dynamic). default=static */
   );
 
   $options = getopt("", $keys);
@@ -115,13 +140,15 @@
   $src = realpath($options["cgallery"] ?: ".");
   $clean = $options["clean"] == "true";
   $path = resolve(realpath($options["path"]));
+  $mode = $options["mode"] == "dynamic" ? "dynamic" : "static";
 
   /* show configuration to the user */
   print "configuration:\n";
   print "  cgallery path: " . $src . "\n";
   print "  directory to index: " . $path . "\n";
-  print "  clean: " . ($clean ? "true" : "false");
-  print "\n\n";
+  print "  clean: " . ($clean ? "true" : "false") . "\n";
+  print "  mode: " . $mode . "\n";
+  print "\n";
 
   $album = resolve(path($src, "album.php"));
   $series = resolve(path($src, "series.php"));
