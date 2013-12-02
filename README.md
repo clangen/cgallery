@@ -2,9 +2,9 @@ cgallery
 =========
 **a simple photo management system** that works well with webkit, gecko, and ie10+.
 
-cgallery is written in less than 2000 lines of php+js+css+html, and uses jquery and spin.js. the most basic use case requires no configuration: just drop **album.php** in a directory and go.
+cgallery is written in less than 2000 lines of php+js+css+html. it also uses jquery and spin.js. the most basic use case requires no configuration: just drop **album.php** in a directory of images and you're done.
 
-more advanced use cases are also supported: **series.php** may be used to index a directory that contains a set of albums, indexed with album.php. series.php supports minimal configuration: sub-directories may be excluded by placing an empty file called **.hidden** in the undesired directory. a series may also contain other series, which will be detected during the indexing process by the existance of an empty file called **.series** in the target directory.
+more advanced use cases support nesting, and require minimal configuration. **series.php** is used to index a directory that contains directories of albums and other series. cgallery sources include a build script (**build.php**) that can be used to manage these types of configurations.
 
 cgallery also supports keyboard navigation and deep-linkable urls.
 
@@ -17,40 +17,34 @@ cgallery also supports keyboard navigation and deep-linkable urls.
 git clone git@bitbucket.org:clangen/cgallery.git
 ```
 
-####cgallery consists of:
-* two php files:
-    * **album.php**
-    * **series.php**
-* cdn versions of:
-    * **jquery**
-    * **spin.js**
-
 ### album.php:
-* indexes a single album (defined by a directory of images)
-* uses php to scan directory and generate thumbnails -- optionally on the fly
+* drop it in a directory of images and call it index.php
+* uses php to scan its containing directory and generate thumbnails
+* outputs is a single-file html app
 
 for example: let's say you have a directory full of images called *my_album_2013-09*
 ```sh
 cd my_album_2013-09
-ln -s ~/src/cgallery/album.php ./index.php
+mv album.php index.php
 ```
 now, every time someone vists http://yoursite.com/my_album_2013-09 they'll see a photo album instead of a directory listing.
 
 you can (and **should** if you're serving a lot of traffic) use album.php to generate static html. using php to scan the filesystem for new thumbnails during every page load is a bad idea.
 
 ```sh
-php ~/cgallery/album.php > index.html
+php album.php > index.html
 ```
 
 ### series.php:
-* indexes a directory of albums and/or series (e.g. family photos)
+* indexes a directory of albums and/or series.
+* sub-directories are excluded from a series if they contain an empty file called **.hidden**.
+* a  series may also contain other series. this is detected when the sub-directory has an empty file called **.series**.
+* output is a single-file html app
 
 ```sh
 mkdir family_photos
+touch family_photos/.series
 ln -s ~/cgallery/series.php index.php
-
-mkdir family_photos/thanksgiving_2011-09
-ln -s ~/cgallery/album.php index.php
 ```
 
 ### faq:
@@ -63,14 +57,6 @@ i like messing around with photos and just wanted a simple, directory-based mana
 
 all major browser revisions less than a year or two old should work fine. current versions of chrome, safari, firefox, and internet explorer are tested regularly and should be fully supported.
 
-> there are certain sub-directories i don't want series.php to index, how can i prevent them from showing up in the left panel?
-
-create an empty file called **.hidden** in the directories you want to exclude.
-
-> i have a sub-directory that contains a series, not just a simple album. is this supported?
-
-yes! just create an empty file called **.series** in this directory, and it will be indexed separately.
-
 > why use cgallery instead of [my current image hosting service]?
 
 there's not a good reason, honestly. image hosting services are generally cheap/free and are easy to use. i personally like hosting my photos on my servers, and want viewers browse the way i want. i created cgallery for selfish reasons, but realized it may be useful to others.
@@ -81,7 +67,7 @@ there's not a good reason, honestly. image hosting services are generally cheap/
 
 > why are are js and css included in the php files?
 
-this was a conscience decision. although externalizing these resources would be easy, the scripts seem more useful when they are completely self-contained. just drop the php file in a directory and go. the consequence is that, in a couple cases, there is a small amount of code duplicated between album.php and series.php. yes, this makes maintenance slightly more annoying, but it also makes the system easier to use.
+this was a conscience decision. the scripts seem more useful when they are completely self-contained. just drop the php file in a directory and go. the consequence is that, in a couple cases, there is a small amount of code duplicated between album.php and series.php. yes, this makes maintenance slightly more annoying, but it also makes the system easier to use.
 
 > why aren't the javascript and css minified?
 
