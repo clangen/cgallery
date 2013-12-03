@@ -10,7 +10,7 @@
    *   --src=/path/to/cgallery/src  : where album.php and series.php live. default=cwd
    *   --dst=/path/to/images/dir    : location of root directory that should be indexed. required.
    *   --rethumb=true|false         : if true, thumbnails will be deleted, then re-created. optional.
-   *   --mode=static|dynamic        : static means generic static html, dynamic will symlink php files
+   *   --mode=static|dynamic|local  : static means generic static html, dynamic will symlink php files
    */
 
   function err($msg, $code = 999) {
@@ -76,10 +76,11 @@
 
     chdir($dir);
 
-    if ($mode == "static") {
+    if ($mode == "static" || $mode == "local") {
       print "  generating thumbnails to $thumbs using $php\n";
       print "    note: this will silently create missing thumbnails\n";
-      exec("php $album > index.html");
+      exec("php $album -m $mode > index.html");
+      print "  created $mode index.html file\n";
     }
     else if ($mode == "dynamic") {
       exec("php $album");
@@ -108,10 +109,10 @@
 
     chdir($dir);
 
-    if ($mode == "static") { /* generate a static html file. this
+    if ($mode == "static" || $mode == "local") { /* generate a static html file. this
       will implicitly trigger a thumbnail refresh */
-      print "  generating index.html using series.php\n";
-      exec("php $series > index.html"); /* ugh, but it works and is easy */
+      print "  generating $mode index.html using series.php\n";
+      exec("php $series -m $mode > index.html"); /* ugh, but it works and is easy */
       print "  done\n\n";
     }
     else if ($mode == "dynamic") {
@@ -158,18 +159,25 @@
   $src = realpath($options["src"] ?: ".");
   $rethumb = $options["rethumb"] == "true";
   $dst = resolve(realpath($options["dst"]));
-  $mode = $options["mode"] == "static" ? "static" : "dynamic";
+  $mode = $options["mode"] ?: "static";
+
+  $validModes = array("dynamic", "static", "local");
+  if (!in_array($mode, $validModes)) {
+    err("ERROR: --mode $mode is not valid. please use dynamic, static, or local");
+  }
 
   /* show configuration to the user */
   print "\nbuild will use the following config:\n\n";
   print "  src dir: " . $src . "\n";
   print "  dst dir: " . $options["dst"] . "\n";
-  print "  re-generate thumbnails? " . ($rethumb ? "yes" : "nope") . "\n";
-  print "  mode: " . ($mode ? "static (generated html)" : "dynamic (refresh on load)") . "\n";
+  print "  re-generate thumbnails? " . ($rethumb ? "yes" : "no") . "\n";
+  print "  mode: " . $mode . "\n";
 
   if (!$options["dst"]) {
     err("ERROR: --dst= is required, please specify a target directory.");
   }
+
+  print "\nthis will overwrite any existing index.html and index.php files\n";
 
   print "\nconfirm? y/n ";
 
@@ -197,4 +205,5 @@
 
   /* kick the whole thing off! */
   compile($dst);
+  fin();
 ?>

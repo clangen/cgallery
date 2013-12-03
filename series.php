@@ -10,6 +10,9 @@
   */
   header("Content-Type: text/html; charset=utf-8");
 
+  $options = getopt("m:"); /* mode */
+  $protocol = $options['m'] == 'local' ? "http:" : "";
+
   $albums = array();
   $series = array();
 
@@ -275,13 +278,18 @@
   }
 </style>
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/spin.js/1.2.7/spin.min.js"></script>
+<?php 
+  global $protocol;
+  printf('<script src="' . $protocol . '//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>' . "\n");
+  printf('<script src="' . $protocol . '//cdnjs.cloudflare.com/ajax/libs/spin.js/1.2.7/spin.min.js"></script>' . "\n");
+?>
 
 <script type="text/javascript">
   (function() {
     /* YYYY-MM-DD or YYYY-MM */
     var SIMPLE_DATE_REGEX = /^\d{4}-\d{2}(-\d{2})?$/;
+
+    var LOCAL = (window.location.protocol === "file:");
 
     var LIST_ITEM_TEMPLATE =
       '<li class="item album-name">' +
@@ -557,10 +565,14 @@
       /* strip filename, if one exists (e.g. index.php) */
       var path = window.location.pathname.replace(/[^\/]*$/, '');
 
+      /* if local, that is, reading from the filesystem, we'll need
+      to explicitly include index.html. */
+      var filename = LOCAL ? '/index.html' : '';
+
       var result =
         window.location.protocol + '//' +
         window.location.hostname + port +
-        path + album +
+        path + album + filename +
         "#" + selected + getBackgroundColor();
 
       return result;
@@ -790,8 +802,7 @@
         we have one. maintains right click -> copy url functionality */
         $('.back').on('click', function(event) {
           event.preventDefault();
-          var url = $(event.currentTarget).attr('href');
-          url += backHash || '';
+          var url = $(event.currentTarget).attr('href') + (backHash || '');
           window.location.href = url;
         });
 
@@ -810,7 +821,10 @@
       };
 
       var getBackBaseUrl = function() {
-          var path = window.location.pathname.split('/');
+          /* strip filename -- definitely exists in local mode, but
+          may also exist if webservers decide to add it for some reason */
+          var path = window.location.pathname.replace(/[^\/]*$/, '').split('/');
+
           while (path.length) {
             if (path.pop() !== '') {
               break;
@@ -823,7 +837,7 @@
       var render = function() {
         /* generate album list, add to DOM */
         var $albumList = $(".album-list");
-        var item, caption, parts, template, html;
+        var item, caption, parts, template, html, url;
         for (i = 0; i < model.length; i++) {
             item = model[i];
             caption = item.name.replace(/_/g, " ");
@@ -842,8 +856,11 @@
             else if (item.type === 'series') {
               template = LIST_ITEM_SERIES_TEMPLATE;
 
+              /* support local (i.e. filesystem, non-webserver) */
+              url = item.name + (LOCAL ? "/index.html" : '');
+
               html = template
-                .replace("{{url}}", item.name + "?b=1")
+                .replace("{{url}}", url + "?b=1")
                 .replace("{{caption}}", parts.caption)
                 .replace("{{index}}", i);
             }
@@ -865,7 +882,7 @@
         if (backHash || query.b) {
           var backUrl = getBackBaseUrl();
           $('.back').addClass('show');
-          $('.back').attr('href', backUrl + '/');
+          $('.back').attr('href', backUrl + (LOCAL ? "/index.html" : "/"));
 
           /* make things a bit more user friendly if we can figure out the
           name of the series we want to go back to */

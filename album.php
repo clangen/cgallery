@@ -10,6 +10,9 @@
   */
   header("Content-Type: text/html; charset=utf-8");
 
+  $options = getopt("m:"); /* mode */
+  $protocol = $options['m'] == 'local' ? "http:" : "";
+
   function listImages() {
     $dir = opendir(".");
     $result = array();
@@ -339,8 +342,11 @@
   }
 </style>
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/spin.js/1.2.7/spin.min.js"></script>
+<?php 
+  global $protocol;
+  printf('<script src="' . $protocol . '//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>' . "\n");
+  printf('<script src="' . $protocol . '//cdnjs.cloudflare.com/ajax/libs/spin.js/1.2.7/spin.min.js"></script>' . "\n");
+?>
 
 <script>
   /* https://github.com/brandonaaron/jquery-getscrollbarwidth/blob/master/jquery.getscrollbarwidth.js */
