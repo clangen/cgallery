@@ -4,11 +4,11 @@
    * albums and series based on directory structure.
    *
    * arguments:
-   *   -s /path/to/cgallery/src : where album.php and series.php live. default=cwd
-   *   -p /path/to/images/dir   : location of root directory that should be indexed. required.
-   *   -d true|false            : if true, thumbnails will be deleted, then re-created. optional.
-   *   -m static|dynamic|local  : static means generic static html, dynamic will symlink php files
-   *   -t series|album          : root type for this run
+   *   -s[ource directory]                        default:`cwd`
+   *   -p[ath to image dir]
+   *   -d[elete thumbnails]
+   *   -m[ode] static|dynamic|local|uninstall     default: static
+   *   -t[type] series|album|auto                 default: auto
    */
   function err($msg, $code = 999) {
     if ($code == "quiet") {
@@ -21,13 +21,13 @@
     print "ERROR: $msg\n\n";
 
     print "required:\n";
-    print "  -p /path/to/images/dir     : gallery files will be copied here.\n\n";
+    print "  -p[ath to image dir]\n\n";
 
     print "optional:\n";
-    print "  -m static|dynamic|local|rm : generation mode. default=dynamic\n";
-    print "  -t series|album            : page type. default=series\n";
-    print "  -d true|false              : delete thumbnails. default=false\n";
-    print "  -s /path/to/cgallery/src   : default=`cwd`\n\n";
+    print "  -m[ode] static|dynamic|local|uninstall     default: static\n";
+    print "  -t[type] series|album|auto                 default: auto\n";
+    print "  -d[elete thumbnails]\n";
+    print "  -s[ource directory]                        default:`cwd`\n\n";
 
     print "aborted.\n\n";
 
