@@ -1,6 +1,6 @@
 <?php /** album.php **/
   /*
-  * cgallery v2.1
+  * cgallery v2.2
   *
   * album.php:
   * - indexes a directory of images and creates thumbnails.
@@ -160,6 +160,34 @@
     opacity: 1.0;
   }
 
+  .bitbucket {
+    display: none;
+    position: absolute;
+    text-align: center;
+    line-height: 1.2em;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 20px;
+  }
+
+  .bitbucket a {
+    color: #888;
+    text-shadow: 0 0 3px #222;
+    font-size: 11px;
+    text-decoration: none;
+  }
+
+  .bitbucket a:hover {
+    color: #aaa;
+    text-shadow: 0 0 3px #000;
+    text-decoration: underline;
+  }
+
+  .project-link .bitbucket {
+    display: block;
+  }
+
   .footer {
     -webkit-overflow-scrolling: touch;
     position: absolute;
@@ -175,12 +203,20 @@
     box-shadow: 0 0 4px #111;
   }
 
+  .project-link .footer {
+    bottom: 20px;
+  }
+
   .middle {
     position: absolute;
     left: 0;
     right: 0;
     top: 25px;
-    bottom: 96px;
+    bottom: 100px;
+  }
+
+  .project-link .middle {
+    bottom: 120px;
   }
 
   .color-picker {
@@ -428,6 +464,10 @@
       var embedded = (window.parent !== window);
       var disableHistory = /[&?](nohistory|n)=1/.test(window.location.search);
       var back;
+
+      if (!embedded) {
+        $body.addClass('project-link');
+      }
 
       if (embedded) {
         $(window).on('message', function(event) {
@@ -834,5 +874,8 @@
     <div class="footer">
         <div class="strip"></div>
     </div>
+  <div class="bitbucket">
+    <a href="https://bitbucket.org/clangen/cgallery" target="_new">https://bitbucket.org/clangen/cgallery</a>
+  </div>
 </body>
 </html>

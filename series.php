@@ -1,6 +1,6 @@
 <?php /** series.php **/
   /*
-  * cgallery v2.1
+  * cgallery v2.2
   *
   * series.php:
   * - indexes a directory of albums and other series.
@@ -278,7 +278,7 @@
   }
 </style>
 
-<?php 
+<?php
   global $protocol;
   printf('<script src="' . $protocol . '//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>' . "\n");
   printf('<script src="' . $protocol . '//cdnjs.cloudflare.com/ajax/libs/spin.js/1.2.7/spin.min.js"></script>' . "\n");

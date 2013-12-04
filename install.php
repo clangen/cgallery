@@ -1,7 +1,11 @@
 <?php
   /*
-   * this is a simple, command-line php file that can be used to generate a gallery of
-   * albums and series based on directory structure.
+   * cgallery v2.2
+   *
+   * install.php:
+   *
+   * this is a simple, command-line php file that can be used to generate a
+   * gallery of albums and series based on directory structure.
    *
    * arguments:
    *   -s[ource directory]                        default:`cwd`
@@ -39,7 +43,7 @@
   }
 
   /* ugh, http://stackoverflow.com/questions/1091107/how-to-join-filesystem-path-strings-in-php.
-  this is a path join function, it will basically trim up and slash delimit the argv */
+  this is a path join function, it will basically trim up and slash delimit the args */
   function path() {
     return preg_replace('~[/\\\]+~', DIRECTORY_SEPARATOR, implode(DIRECTORY_SEPARATOR, array_filter(func_get_args(), function($p) {
       return $p !== '';
