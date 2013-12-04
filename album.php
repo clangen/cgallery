@@ -162,6 +162,7 @@
 
   .bitbucket {
     display: none;
+    background-color: rgb(46, 46, 46);
     position: absolute;
     text-align: center;
     line-height: 1.2em;
@@ -172,14 +173,14 @@
   }
 
   .bitbucket a {
-    color: #888;
+    color: #666;
     text-shadow: 0 0 3px #222;
     font-size: 11px;
     text-decoration: none;
   }
 
   .bitbucket a:hover {
-    color: #aaa;
+    color: #bbb;
     text-shadow: 0 0 3px #000;
     text-decoration: underline;
   }
