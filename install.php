@@ -21,13 +21,13 @@
     print "ERROR: $msg\n\n";
 
     print "required:\n";
-    print "  -p /path/to/images/dir   : gallery files will be copied here.\n\n";
+    print "  -p /path/to/images/dir     : gallery files will be copied here.\n\n";
 
     print "optional:\n";
-    print "  -m static|dynamic|local  : generation mode. default=dynamic\n";
-    print "  -t series|album          : page type. default=series\n";
-    print "  -d true|false            : delete thumbnails. default=false\n";
-    print "  -s /path/to/cgallery/src : default=`cwd`\n\n";
+    print "  -m static|dynamic|local|rm : generation mode. default=dynamic\n";
+    print "  -t series|album            : page type. default=series\n";
+    print "  -d true|false              : delete thumbnails. default=false\n";
+    print "  -s /path/to/cgallery/src   : default=`cwd`\n\n";
 
     print "aborted.\n\n";
 
@@ -78,9 +78,6 @@
 
     $oldcwd = getcwd();
 
-    check_rm($html);
-    check_rm($php);
-
     if ($rethumb && is_dir($thumbs)) {
       print "  re-generating thumbnails\n";
       chdir($thumbs);
@@ -119,9 +116,6 @@
 
     $oldcwd = getcwd(); /* will restore at the end... */
 
-    check_rm($html);
-    check_rm($php);
-
     chdir($dir);
 
     if ($mode == "static" || $mode == "local") { /* generate a static html file. this
@@ -154,6 +148,9 @@
     default to album. */
     $type = $override ?: $type;
 
+    check_rm($dir . "/index.html");
+    check_rm($dir . "/index.php");
+
     if ($type == "series") {
       install_series($dir);
     }
@@ -172,7 +169,7 @@
   $mode = $options["m"] ?: "static";
   $type = $options["t"] ?: "series";
 
-  $validModes = array("dynamic", "static", "local");
+  $validModes = array("dynamic", "static", "local", "rm");
   if (!in_array($mode, $validModes)) {
     err("'-m $mode' is not valid. please use " . implode('|', $validModes));
   }
