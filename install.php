@@ -71,23 +71,22 @@
   function install_album($dir) {
     $html = path($dir, "index.html");
     $php = path($dir, "index.php");
-    $thumbs = path($dir, ".thumbs");
     global $album;
     global $rethumb;
     global $mode;
 
     $oldcwd = getcwd();
 
+    chdir($dir);
+
+    $thumbs = path($dir, ".thumbs");
     if ($rethumb && is_dir($thumbs)) {
-      print "  re-generating thumbnails\n";
       chdir($thumbs);
 
       foreach (glob("*.jpg") as $thumb) {
           check_rm($thumb);
       }
     }
-
-    chdir($dir);
 
     if ($mode == "static" || $mode == "local") {
       print "  generating thumbnails to $thumbs using $php\n";
@@ -151,25 +150,27 @@
     check_rm($dir . "/index.html");
     check_rm($dir . "/index.php");
 
-    if ($type == "series") {
-      install_series($dir);
-    }
-    else {
-      install_album($dir);
+    if ($dir[0] != ".") {
+      if ($type == "series") {
+        install_series($dir);
+      }
+      else {
+        install_album($dir);
+      }
     }
   }
 
   /* these are the input arguments we accept */
-  $options = getopt("s:p:d:m:t:");
+  $options = getopt("s:p:dm:t:");
 
   /* resolve working paths */
   $src = realpath($options["s"] ?: ".");
-  $rethumb = $options["c"] == "true";
+  $rethumb = array_key_exists("d", $options);
   $dst = resolve(realpath($options["p"]));
   $mode = $options["m"] ?: "static";
   $type = $options["t"] ?: "series";
 
-  $validModes = array("dynamic", "static", "local", "rm");
+  $validModes = array("dynamic", "static", "local", "uninstall");
   if (!in_array($mode, $validModes)) {
     err("'-m $mode' is not valid. please use " . implode('|', $validModes));
   }
