@@ -23,7 +23,7 @@
   $result = array();
 
   while (($file = readdir($dir)) !== false) {
-    if ($file != "." && $file != ".." && is_dir($file)) {
+    if ($file != "." && $file != ".thumbs" && $file != ".." && is_dir($file)) {
         $hidden = $file . "/.hidden";
 
         if (is_file($hidden) || is_file($hidden . "-" . $cwd)) {

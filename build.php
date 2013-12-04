@@ -7,10 +7,11 @@
    * is as follows:
    *
    * arguments:
-   *   --src=/path/to/cgallery/src  : where album.php and series.php live. default=cwd
-   *   --dst=/path/to/images/dir    : location of root directory that should be indexed. required.
-   *   --rethumb=true|false         : if true, thumbnails will be deleted, then re-created. optional.
-   *   --mode=static|dynamic|local  : static means generic static html, dynamic will symlink php files
+   *   -s /path/to/cgallery/src  : where album.php and series.php live. default=cwd
+   *   -p /path/to/images/dir      : location of root directory that should be indexed. required.
+   *   -d true|false         : if true, thumbnails will be deleted, then re-created. optional.
+   *   -m static|dynamic|local  : static means generic static html, dynamic will symlink php files
+   *   -t series|album          : root type for this run
    */
 
   function err($msg, $code = 999) {
@@ -131,11 +132,15 @@
   }
 
   /* given a directory, compiles it as an album or series */
-  function compile($dir) {
+  function compile($dir, $override = null) {
     $type = file_exists(path($dir, ".series")) ? "series" : "album";
 
     print "compiling: " . $dir . "\n\n";
     print "  type: " . $type . "\n";
+
+    /* use override if specified, otherwise we'll
+    default to album. */
+    $type = $override ?: $type;
 
     if ($type == "series") {
       compile_series($dir);
@@ -145,21 +150,15 @@
     }
   }
 
-  /* these are the input arguments we expect */
-  $keys = array(
-    "src:",     /* not required: default=cwd */
-    "dst:",     /* required: path to photo directory tree */
-    "rethumb:", /* not required. if true, will re-generate thumbnails */
-    "mode:"     /* not required. values=(static, dynamic). default=dynamic */
-  );
-
-  $options = getopt("", $keys);
+  /* these are the input arguments we accept */
+  $options = getopt("s:p:d:m:t:");
 
   /* resolve working paths */
-  $src = realpath($options["src"] ?: ".");
-  $rethumb = $options["rethumb"] == "true";
-  $dst = resolve(realpath($options["dst"]));
-  $mode = $options["mode"] ?: "static";
+  $src = realpath($options["s"] ?: ".");
+  $rethumb = $options["c"] == "true";
+  $dst = resolve(realpath($options["p"]));
+  $mode = $options["m"] ?: "static";
+  $type = $options["t"] ?: "series";
 
   $validModes = array("dynamic", "static", "local");
   if (!in_array($mode, $validModes)) {
@@ -169,12 +168,13 @@
   /* show configuration to the user */
   print "\nbuild will use the following config:\n\n";
   print "  src dir: " . $src . "\n";
-  print "  dst dir: " . $options["dst"] . "\n";
+  print "  dst dir: " . $options["p"] . "\n";
   print "  re-generate thumbnails? " . ($rethumb ? "yes" : "no") . "\n";
+  print "  type: " . $type . "\n";
   print "  mode: " . $mode . "\n";
 
-  if (!$options["dst"]) {
-    err("ERROR: --dst= is required, please specify a target directory.");
+  if (!$options["p"]) {
+    err("ERROR: -p is required, please specify a target directory.");
   }
 
   print "\nthis will overwrite any existing index.html and index.php files\n";
@@ -204,6 +204,6 @@
   }
 
   /* kick the whole thing off! */
-  compile($dst);
+  compile($dst, $type);
   fin();
 ?>

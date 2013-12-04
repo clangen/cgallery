@@ -1,5 +1,5 @@
 <?php /** album.php **/
-  /* 
+  /*
   * cgallery v2.1
   *
   * album.php:
@@ -342,7 +342,7 @@
   }
 </style>
 
-<?php 
+<?php
   global $protocol;
   printf('<script src="' . $protocol . '//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>' . "\n");
   printf('<script src="' . $protocol . '//cdnjs.cloudflare.com/ajax/libs/spin.js/1.2.7/spin.min.js"></script>' . "\n");
@@ -426,6 +426,7 @@
       var currentImage, lastHash;
       var hashPollInterval;
       var embedded = (window.parent !== window);
+      var disableHistory = /[&?](nohistory|n)=1/.test(window.location.search);
       var back;
 
       if (embedded) {
@@ -518,9 +519,24 @@
         }
 
         var hash = generateHash(options);
+        var replace = disableHistory;
+
+        /* if there's no hash in the url yet, then don't maintain it in the
+        back stack. only remember the first actual image selected */
+        if (getHashFromUrl() === "#") {
+          replace = true;
+        }
 
         if (hash !== getHashFromUrl() || hash !== lastHash) {
-          window.location.hash = lastHash = hash;
+          if (replace) {
+            var href = location.href.replace(/(javascript:|#).*$/, '');
+            location.replace(href + hash);
+          }
+          else {
+            window.location.hash = lastHash = hash;
+          }
+
+          lastHash = hash;
         }
       }
 
