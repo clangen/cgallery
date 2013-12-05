@@ -8,11 +8,11 @@
    * gallery of albums and series based on directory structure.
    *
    * arguments:
-   *   -s[ource directory]                        default:`cwd`
    *   -p[ath to image dir]
-   *   -d[elete thumbnails]
    *   -m[ode] static|dynamic|local|uninstall     default: static
-   *   -t[type] series|album|auto                 default: auto
+   *   -t[ype] series|album|auto                  default: auto
+   *   -d[elete thumbnails]
+   *   -s[ource directory]                        default:`cwd`
    */
   function err($msg, $code = 999) {
     if ($code == "quiet") {
@@ -29,7 +29,7 @@
 
     print "optional:\n";
     print "  -m[ode] static|dynamic|local|uninstall     default: static\n";
-    print "  -t[type] series|album|auto                 default: auto\n";
+    print "  -t[ype] series|album|auto                  default: auto\n";
     print "  -d[elete thumbnails]\n";
     print "  -s[ource directory]                        default:`cwd`\n\n";
 

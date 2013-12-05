@@ -4,17 +4,60 @@ cgallery
 
 cgallery is written in less than 2000 lines of php+js+css+html. it also uses jquery and spin.js. the most basic use case requires no configuration: just drop **album.php** in a directory of images and you're done.
 
-more advanced use cases support nesting, and require minimal configuration. **series.php** is used to index a directory that contains directories of albums and other series. cgallery sources include a build script (**build.php**) that can be used to manage these types of configurations.
+more advanced use cases support nesting, and require minimal configuration. **series.php** is used to index a directory that contains directories of albums and other series. cgallery sources include an install script (**install.php**) that can be used to manage these types of configurations.
 
 cgallery also supports keyboard navigation and deep-linkable urls.
 
-[try out a demo here.](http://casey.io/cgallery/demo)
+[you can try a demo here.](http://casey.io/cgallery/demo)
 
-####cgallery requires:
-* a **web server** with **php** and the **gd** image library
+### requirements
+**cgallery** requires a **web server** with **php** and the **gd** image library
 
+### download
 ```sh
 git clone git@bitbucket.org:clangen/cgallery.git
+```
+
+### install.php
+a simple command-line interface that can be used to generate individual albums, series, and series containing other series (i.e. complex album/series trees).
+
+here's a list of arguments the script accepts:
+
+```sh
+required:
+  -p[ath to image dir]
+
+optional:
+  -m[ode] static|dynamic|local|uninstall     default: static
+  -t[ype] series|album|auto                  default: auto
+  -d[elete thumbnails]
+  -s[ource directory]                        default:`cwd`
+```
+
+#### -p[ath]
+* the destination directory. this is where cgallery will be installed.
+
+#### -m[ode]
+* **static**: scans the input directory images, generates thumbnails, and creates static index.html files. whenever you add new images to your directory structure, you will need to run the script again to pick them up. if you're serving a lot of traffic, this is your best bet.
+* **local**: a varient of static, this is used to generate galleries that will not be served by a webserver (i.e. viewed from a local filesystem).
+* **dynamic**: symlinks to album.php, or series.php (depending on configuration). every time a user visits the page, the working directory will be re-scanned for new images will be thumbnails will be generated. this is most useful while building your gallery and during development.
+* **uninstall**: recursively removes all index.php and index.html files in the specified path. note this will **not** delete thumbnails, but may be used in conjunction with the **-d** option.
+
+#### -t[ype]
+* **series**: creates a series in the specified path, then recursively creates series and albums from the sub-directories.
+* **album**: creates an album in the specified path.
+* **auto**: attempts to guess the type of installation.
+
+#### -d[elete thumbnails]
+* if specified, thumbnails will be deleted, recursively, from the specified path.
+
+#### -s[ource directory]
+* specifies where the cgallery sources live. by default, this is the current working directory.
+
+#### simple example:
+
+```sh
+php install.php -p ~/public_html/images/
 ```
 
 ### album.php:
