@@ -8,22 +8,22 @@ more advanced use cases support nesting, and require minimal configuration. **se
 
 cgallery also supports keyboard navigation and deep-linkable urls.
 
-[you can try a demo here.](http://casey.io/cgallery/demo)
+[a demo is available here.](http://casey.io/cgallery/demo)
 
 ### requirements
-**cgallery** requires a **web server** with **php** and the **gd** image library
+**cgallery** requires a **web server** with **php** and the **gd** image library.
 
 ### download
 ```sh
 git clone git@bitbucket.org:clangen/cgallery.git
 ```
 
-### install.php
-a simple command-line interface that can be used to generate individual albums, series, and series containing other series (i.e. complex album/series trees).
+### usage
+the easiest way to use cgallery is **install.php**, a simple command-line utility that comes with the source code. install.php can be used to generate albums, series, and complex galleries that contain nested albums and series.
 
-here's a list of arguments the script accepts:
+here's a list of arguments that install.php supports:
 
-```sh
+```
 required:
   -p[ath to image dir]
 
@@ -60,7 +60,9 @@ optional:
 php install.php -p ~/public_html/images/
 ```
 
-### album.php:
+### details
+
+#### album.php:
 * drop it in a directory of images and call it index.php
 * uses php to scan its containing directory and generate thumbnails
 * outputs is a single-file html app
@@ -78,7 +80,7 @@ you can (and **should** if you're serving a lot of traffic) use album.php to gen
 php album.php > index.html
 ```
 
-### series.php:
+#### series.php:
 * indexes a directory of albums and/or series.
 * sub-directories are excluded from a series if they contain an empty file called **.hidden**.
 * a  series may also contain other series. this is detected when the sub-directory has an empty file called **.series**.
