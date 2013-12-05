@@ -70,6 +70,38 @@
     }
   }
 
+  $dirstack = array();
+
+  function pushdir($dir) {
+    global $dirstack;
+    array_push($dirstack, getcwd());
+    chdir($dir);
+  }
+
+  function popdir() {
+    global $dirstack;
+    $dir = array_pop($dirstack);
+    chdir($dir);
+    return $dir;
+  }
+
+  function delete_if_auto_series($dir) {
+    $f = path($dir, '.series');
+    if (is_file($f)) {
+      if (file_get_contents($f) == "auto") {
+        check_rm($f);
+      }
+    }
+  }
+
+  function write_auto_series($dir) {
+    $f = path($dir, '.series');
+    if (!is_file($f)) {
+      print "  writing .series file to $f\n";
+      file_put_contents($f, "auto");
+    }
+  }
+
   /* install the specified directory as an album. will use album.php
   to generate a static index.html file */
   function install_album($dir) {
@@ -79,9 +111,7 @@
     global $rethumb;
     global $mode;
 
-    $oldcwd = getcwd();
-
-    chdir($dir);
+    pushdir($dir);
 
     $thumbs = path($dir, ".thumbs");
     if ($rethumb && is_dir($thumbs)) {
@@ -105,7 +135,7 @@
       symlink($album, $php);
     }
 
-    chdir($oldcwd);
+    popdir();
   }
 
   /* install the specified directory as a series. will use series.php
@@ -117,30 +147,36 @@
     global $rethumb;
     global $mode;
 
-    $oldcwd = getcwd(); /* will restore at the end... */
+    pushdir($dir);
 
-    chdir($dir);
+    /* install each sub-directory. install will figure out if the
+    specified directory is an album or a nested series. IMPORTANT,
+    this must occur before generating the index file so subseries
+    can be marked correctly */
+    foreach (glob("*", GLOB_ONLYDIR) as $current) {
+      $current = path($dir, $current);
+      $type = guess_type($current);
+      install($current, $type);
+    }
 
     if ($mode == "static" || $mode == "local") { /* generate a static html file. this
       will implicitly trigger a thumbnail refresh */
-      print "  generating $mode index.html using series.php\n";
-      exec("php $series -m $mode > index.html"); /* ugh, but it works and is easy */
+      print "  generating $mode $html using $series\n";
+      exec("php $series -m $mode > $html"); /* ugh, but it works and is easy */
     }
     else if ($mode == "dynamic") {
       print "  linking $series to $php\n";
       symlink($series, $php);
     }
 
-    /* install each sub-directory. install will figure out if the
-    specified directory is an album or a nested series */
-    foreach (glob("*", GLOB_ONLYDIR) as $current) {
-      install(path($dir, $current));
+    if ($mode !== "uninstall") {
+      write_auto_series($dir);
     }
 
-    chdir($oldcwd);
+    popdir();
   }
 
-  /* given a directory, installs it as an album or series */
+  /* given a directory, installs  an album or series */
   function install($dir, $override = null) {
     $type = file_exists(path($dir, ".series")) ? "series" : "album";
 
@@ -155,6 +191,8 @@
     check_rm($dir . "/index.php");
 
     if ($dir[0] != ".") {
+      delete_if_auto_series($dir);
+
       if ($type == "series") {
         install_series($dir);
       }
@@ -162,6 +200,37 @@
         install_album($dir);
       }
     }
+  }
+
+  function guess_type($dir) {
+    if (is_file(path($dir, '.series'))) {
+      return "series";
+    }
+
+    $type = "album";
+
+    pushdir($dir);
+
+    /* if the specified directory has any sub-directories with
+    images, assume series. otherwise, album */
+    foreach (glob("*", GLOB_ONLYDIR) as $current) {
+      if ($current[0] != ".") {
+        $current = path($dir, $current);
+
+        pushdir($current);
+        $images = preg_grep('/(\.jpg|\.png|\.gif)$/i', glob("*"));
+        popdir();
+
+        if (count($images) > 0) {
+          $type = "series";
+          break;
+        }
+      }
+    }
+
+    popdir();
+
+    return $type;
   }
 
   /* these are the input arguments we accept */
@@ -172,20 +241,28 @@
   $rethumb = array_key_exists("d", $options);
   $dst = resolve(realpath($options["p"]));
   $mode = $options["m"] ?: "static";
-  $type = $options["t"] ?: "series";
+  $type = $options["t"] ?: "auto";
 
   $validModes = array("dynamic", "static", "local", "uninstall");
   if (!in_array($mode, $validModes)) {
     err("'-m $mode' is not valid. please use " . implode('|', $validModes));
   }
 
+  if (!$options["p"]) {
+    err("-p is required, please specify a target directory.");
+  }
+
+  if (!is_dir($dst)) {
+    err("specified path $dst is invalid");
+  }
+
+  if ($type == "auto") {
+    $type = guess_type($dst);
+  }
+
   $validTypes = array("album", "series");
   if (!in_array($type, $validTypes)) {
     err("'-t $type' is not valid. please use " . implode('|', $validTypes));
-  }
-
-  if (!$options["p"]) {
-    err("-p is required, please specify a target directory.");
   }
 
   /* check env */
