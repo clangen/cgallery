@@ -10,8 +10,9 @@
   */
   header("Content-Type: text/html; charset=utf-8");
 
-  $options = getopt("m:"); /* mode */
+  $options = getopt("m:t:"); /* mode */
   $protocol = $options['m'] == 'local' ? "http:" : "";
+  $thumbOnly = ($options['t'] == '1');
 
   function listImages() {
     $dir = opendir(".");
@@ -37,6 +38,11 @@
   }
 
   function createThumbnail($inFn, $outFn) {
+    global $thumbOnly;
+    if ($thumbOnly) {
+      print "  creating thumbnail: $outFn\n";
+    }
+
     $maxHeight = 80;
     $format = strtolower(end(explode(".", $inFn)));
 
@@ -95,6 +101,10 @@
 
   $imageList = listImages();
   createThumbnails($imageList);
+
+  if ($thumbOnly) {
+    exit(0);
+  }
 ?>
 <html>
 <head>

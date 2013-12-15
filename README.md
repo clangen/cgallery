@@ -4,7 +4,7 @@ cgallery
 
 cgallery is written in less than 2000 lines of php+js+css+html. it also uses jquery and spin.js. the most basic use case requires no configuration: just drop **album.php** in a directory of images and you're done.
 
-more advanced use cases support nesting, and require minimal configuration. **series.php** is used to index a directory that contains directories of albums and other series. cgallery sources include an install script (**install.php**) that can be used to manage these types of configurations.
+more advanced use cases support nested sub-directories, and require minimal configuration. **series.php** is used to index a directory that contains directories of albums and other series. cgallery sources include an install script named **install.php** that can be used to manage these types of configurations.
 
 cgallery also supports keyboard navigation and deep-linkable urls.
 
@@ -18,7 +18,7 @@ cgallery also supports keyboard navigation and deep-linkable urls.
 git clone git@bitbucket.org:clangen/cgallery.git
 ```
 
-### usage
+### using install.php
 the easiest way to use cgallery is **install.php**, a simple command-line utility that comes with the source code. install.php can be used to generate albums, series, and complex galleries that contain nested albums and series.
 
 here's a list of arguments that install.php supports:
@@ -38,8 +38,8 @@ optional:
 * the destination directory. this is where cgallery will be installed.
 
 #### -m[ode]
-* **static**: scans the input directory images, generates thumbnails, and creates static index.html files. whenever you add new images to your directory structure, you will need to run the script again to pick them up. if you're serving a lot of traffic, this is your best bet.
-* **local**: a varient of static, this is used to generate galleries that will not be served by a webserver (i.e. viewed from a local filesystem).
+* **static**: scans the input directory for images, generates thumbnails, and creates static index.html files. whenever you add new images to your directory structure, you will need to run the script again to pick them up. if you're serving a lot of traffic, this is your best bet.
+* **local**: a variant of static, this is used to generate galleries that will not be served by a webserver (i.e. viewed from a local filesystem).
 * **dynamic**: symlinks to album.php, or series.php (depending on configuration). every time a user visits the page, the working directory will be re-scanned for new images will be thumbnails will be generated. this is most useful while building your gallery and during development.
 * **uninstall**: recursively removes all index.php and index.html files in the specified path. note this will **not** delete thumbnails, but may be used in conjunction with the **-d** option.
 
@@ -60,7 +60,7 @@ optional:
 php install.php -p ~/public_html/images/
 ```
 
-### details
+### manual "installation"
 
 #### album.php:
 * drop it in a directory of images and call it index.php
@@ -70,7 +70,7 @@ php install.php -p ~/public_html/images/
 for example: let's say you have a directory full of images called *my_album_2013-09*
 ```sh
 cd my_album_2013-09
-mv album.php index.php
+cp /path/to/cgallery/album.php ./index.php
 ```
 now, every time someone vists http://yoursite.com/my_album_2013-09 they'll see a photo album instead of a directory listing.
 

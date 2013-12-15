@@ -66,6 +66,18 @@
     }
   }
 
+  function exec_to_stdout($cmd) {
+    /* http://stackoverflow.com/questions/8370628/php-shell-exec-with-realtime-updating */
+    if(($fp = popen($cmd, "r"))) {
+        while(!feof($fp)){
+            echo fread($fp, 1024);
+            flush();
+        }
+
+        fclose($fp);
+    }
+  }
+
   $dirstack = array();
 
   function pushdir($dir) {
@@ -122,14 +134,14 @@
 
     if ($mode == "static" || $mode == "local") {
       print "  generating thumbnails to $thumbs using $album\n";
-      print "  note: this will silently create missing thumbnails\n";
-      exec("php $album -m $mode > index.html");
+      exec_to_stdout("php $album -t 1"); /* create thumbnails (and log to stdout) */
+      exec("php $album -m $mode > index.html"); /* generate html */
       print "  created $mode index.html file\n\n";
     }
     else if ($mode == "dynamic") {
       exec("php $album");
       print "  linking $album to $php\n";
-      print "  note: no thumbnails will be generated until the next page visit'\n\n";
+      print "  note: no thumbnails will be generated until the next page visit\n\n";
       symlink($album, $php);
     }
 
