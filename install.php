@@ -38,16 +38,12 @@
     exit($code);
   }
 
-  function fin() {
-    print("successful\n\n");
-  }
-
   /* ugh, http://stackoverflow.com/questions/1091107/how-to-join-filesystem-path-strings-in-php.
   this is a path join function, it will basically trim up and slash delimit the args */
   function path() {
-    return preg_replace('~[/\\\]+~', DIRECTORY_SEPARATOR, implode(DIRECTORY_SEPARATOR, array_filter(func_get_args(), function($p) {
+    return strip(preg_replace('~[/\\\]+~', DIRECTORY_SEPARATOR, implode(DIRECTORY_SEPARATOR, array_filter(func_get_args(), function($p) {
       return $p !== '';
-    })));
+    }))));
   }
 
   /* resolves a full path, then follows the symlink if applicable */
@@ -88,7 +84,7 @@
   function delete_if_auto_series($dir) {
     $f = path($dir, '.series');
     if (is_file($f)) {
-      if (file_get_contents($f) == "auto") {
+      if (strip(file_get_contents($f)) == "auto") {
         check_rm($f);
       }
     }
@@ -115,15 +111,17 @@
 
     $thumbs = path($dir, ".thumbs");
     if ($rethumb && is_dir($thumbs)) {
-      chdir($thumbs);
+      pushdir($thumbs);
 
-      foreach (glob("*.jpg") as $thumb) {
+      foreach (preg_grep('/(\.jpg|\.png|\.gif)$/i', glob("*")) as $thumb) {
           check_rm($thumb);
       }
+
+      popdir();
     }
 
     if ($mode == "static" || $mode == "local") {
-      print "  generating thumbnails to $thumbs using $php\n";
+      print "  generating thumbnails to $thumbs using $album\n";
       print "  note: this will silently create missing thumbnails\n";
       exec("php $album -m $mode > index.html");
       print "  created $mode index.html file\n\n";
@@ -190,9 +188,9 @@
     check_rm($dir . "/index.html");
     check_rm($dir . "/index.php");
 
-    if ($dir[0] != ".") {
-      delete_if_auto_series($dir);
+    delete_if_auto_series($dir);
 
+    if ($dir[0] != ".") {
       if ($type == "series") {
         install_series($dir);
       }
@@ -288,9 +286,13 @@
 
   $warndir = $options["p"];
 
-  print "warning: this will recursively delete/replace all index.html and index.php files inside '$warndir'\n\n";
+  print "warning: this will recursively delete/replace all index.html and index.php files inside '$warndir'. ";
 
-  print "confirm? y/n ";
+  if ($rethumb) {
+    print "all images contained within any '.thumbs' sub-directories will also be deleted.";
+  }
+
+  print "\n\nconfirm? y/n ";
 
   /* give the user a chance to back out */
   $stdin = fopen('php://stdin', 'r');
@@ -304,5 +306,5 @@
 
   /* kick the whole thing off! */
   install($dst, $type);
-  fin();
+  print("successful\n\n");
 ?>
