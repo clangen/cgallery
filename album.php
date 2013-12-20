@@ -108,6 +108,7 @@
 ?>
 <html>
 <head>
+<title>photos</title>
 <style>
   body > * {
     -webkit-touch-callout: none;
@@ -768,6 +769,13 @@
         moveBy(1);
       }
 
+      function updateTitle() {
+        var parts = window.location.pathname.split("/");
+
+        /* last part will be empty due to trailing slash in url */
+        document.title = "photos - " + parts[parts.length - 2].replace(/_/g, " ");
+      }
+
       function render(params) {
         if (IMAGES.length === 0) {
           $body.addClass('no-images');
@@ -783,6 +791,8 @@
           if (params.b) {
             $body.css("background-color", params.b);
           }
+
+          updateTitle();
 
           setTimeout(function() {
             setImage(image);
