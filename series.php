@@ -47,7 +47,7 @@
 
 <head>
 
-<title>albums</title>
+<title>photos</title>
 
 <style type="text/css">
   body > * {
@@ -365,9 +365,29 @@
     function createDataModel() {
       var result = [];
 
+      var parseListItem = function(caption) {
+        parts = (caption || "").split(" ");
+        var len = parts.length;
+
+        var date;
+        if (len > 1 && SIMPLE_DATE_REGEX.test(parts[len - 1])) {
+          date = parts.pop();
+          caption = parts.join(' ');
+        }
+
+        return { date: date, caption: caption };
+      };
+
       var add = function(arr, type) {
         for (var i = 0; i < arr.length; i++) {
-          result.push({type: type, name: arr[i]});
+          var parts = parseListItem(arr[i].replace(/_/g, " "));
+
+          result.push({
+            type: type,
+            name: arr[i],
+            caption: parts.caption,
+            date: parts.date
+          });
         }
       };
 
@@ -518,19 +538,6 @@
       if (color.length) {
         $('.main').css('background-color', color);
       }
-    }
-
-    function parseListItem(caption) {
-      parts = (caption || "").split(" ");
-      var len = parts.length;
-
-      var date;
-      if (len > 1 && SIMPLE_DATE_REGEX.test(parts[len - 1])) {
-        date = parts.pop();
-        caption = parts.join(' ');
-      }
-
-      return { date: date, caption: caption };
     }
 
     function urlAtIndex(index, hash) {
@@ -720,6 +727,7 @@
           });
 
           currentAlbum = model[index].name;
+          updateTitle(index);
 
           /* write it back to the url */
           finalHashPath = currentHashPath || "";
@@ -730,6 +738,17 @@
 
           writeHash(model[index].name + finalHashPath);
         }
+      };
+
+      var updateTitle = function(index) {
+        var item = model[index];
+
+        var title = "photos - " + item.caption;
+        if (item.date) {
+          title += " (" + item.date + ")";
+        }
+
+        document.title = title;
       };
 
       /* things like back button change the hash without us knowing,
@@ -840,18 +859,16 @@
         var item, caption, parts, template, html, url;
         for (i = 0; i < model.length; i++) {
             item = model[i];
-            caption = item.name.replace(/_/g, " ");
-            parts = parseListItem(caption);
 
             if (item.type === 'album') {
-              template = parts.date ?
+              template = item.date ?
                 LIST_ITEM_TEMPLATE_WITH_DATE : LIST_ITEM_TEMPLATE;
 
               html = template
                 .replace("{{url}}", item.name)
-                .replace("{{caption}}", parts.caption)
+                .replace("{{caption}}", item.caption)
                 .replace("{{index}}", i)
-                .replace("{{date}}", parts.date);
+                .replace("{{date}}", item.date);
             }
             else if (item.type === 'series') {
               template = LIST_ITEM_SERIES_TEMPLATE;
@@ -861,7 +878,7 @@
 
               html = template
                 .replace("{{url}}", url + "?b=1")
-                .replace("{{caption}}", parts.caption)
+                .replace("{{caption}}", item.caption)
                 .replace("{{index}}", i);
             }
 
