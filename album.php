@@ -73,9 +73,16 @@
       $inWidth, $inHeight
     );
 
-    /* write to disk, clean up */
+    /* write to disk, clean up. we always create the thumbnail in
+    the same format as the input image, makes loading them on the
+    client side much simpler */
     if ($result) {
-      imagepng($outImage, $outFn);
+      switch ($format) {
+        case "png": imagepng($outImage, $outFn); break;
+        case "jpg": imagejpeg($outImage, $outFn); break;
+        case "gif": imagegif($outImage, $outFn); break;
+        default: return;
+      }
     }
 
     imagedestroy($inImage);

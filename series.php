@@ -418,7 +418,7 @@
       };
 
       /* given a start index and type, find the previous or next element of the
-      same type. by default this will also wrap around */
+      same type. wraps around */
       result.adjacent = function(start, type, options) {
         start = start || 0;
         options = options || { };
@@ -428,8 +428,8 @@
         var count = result.length;
         while (--count > 0) {
           i += inc;
-          i = (i < 0) ? model.length - 1 : i;
-          i = (i >= model.length) ? 0 : i;
+          i = (i < 0) ? model.length - 1 : i; /* wrap... */
+          i = (i >= model.length) ? 0 : i;  /* ...around */
           if (result[i] && result[i].type === type) {
             return i;
           }
@@ -658,6 +658,21 @@
         }
       };
 
+      /* sometimes we display a "back" button. this generates that link */
+      var getBackBaseUrl = function() {
+          /* strip filename -- definitely exists in local mode, but
+          may also exist if webservers decide to add it for some reason */
+          var path = window.location.pathname.replace(/[^\/]*$/, '').split('/');
+
+          while (path.length) {
+            if (path.pop() !== '') {
+              break;
+            }
+          }
+
+          return path.join('/');
+      };
+
       /* if we don't destroy then re-create the iframe every time the album
       switches, its history gets updated and corrupts our backstack */
       resetIFrame = function(url) {
@@ -837,20 +852,6 @@
               case 40: selectNextAlbum(); break;
             }
         });
-      };
-
-      var getBackBaseUrl = function() {
-          /* strip filename -- definitely exists in local mode, but
-          may also exist if webservers decide to add it for some reason */
-          var path = window.location.pathname.replace(/[^\/]*$/, '').split('/');
-
-          while (path.length) {
-            if (path.pop() !== '') {
-              break;
-            }
-          }
-
-          return path.join('/');
       };
 
       var render = function() {
