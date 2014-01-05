@@ -642,8 +642,9 @@
 
         if (sb !== hasScrollbar) {
           var height = BASE_STRIP_HEIGHT + (sb ? scrollbarSize : 0);
+          var bottom = height + (embedded ? 0 : $('.bitbucket').height());
           $footer.css("height", height);
-          $middle.css("bottom", height);
+          $middle.css("bottom", bottom);
           hasScrollbar = sb;
         }
       }
