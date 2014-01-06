@@ -47,6 +47,8 @@
 
 <head>
 
+<meta charset="utf-8">
+
 <title>photos</title>
 
 <style type="text/css">
@@ -181,9 +183,21 @@
     border: 0;
   }
 
-  .arrow {
+  .back-arrow, .forward-arrow {
     color: #ccc;
-    font-weight: bold;
+    display: inline-block;
+  }
+
+  .back-arrow {
+    -webkit-transform: scale(-1, 1);
+    -ms-transform: scale(-1, 1);
+    -moz-transform: scale(-1, 1);
+    -o-transform: scale(-1, 1);
+    transform: scale(-1, 1);
+  }
+
+  .forward-arrow {
+    padding-left: 2px;
   }
 
   .loading .embedded {
@@ -237,6 +251,7 @@
     -moz-box-shadow: 0 0 5px #222;
     box-shadow: 0 0 5px #222;
     margin-top: 6px;
+    text-decoration: none;
   }
 
   .back.show {
@@ -310,7 +325,7 @@
       '<li class="item album-name">' +
         '<a href="{{url}}" data-index="{{index}}">' +
           '{{caption}}' +
-          '<span class="arrow"> \u21fe</span>' +
+          '<span class="forward-arrow">➜</span>' +
         '</a>' +
       '</li>';
 
@@ -929,7 +944,7 @@
   <div class="left">
     <a href="#" class="back">
       <span class="link">
-        <span class="arrow">&#x21fd;</span> <span class="back-text">back</span>
+        <span class="back-arrow">&#x279C;</span> <span class="back-text">back</span>
       </span>
     </a>
     <div class="albums">
