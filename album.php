@@ -131,6 +131,12 @@
     background: transparent;
   }
 
+  html {
+    /* sometimes webkit displays a vertical when we're embedded.
+    this fixes that. */
+    overflow: hidden;
+  }
+
   body {
     font-family: sans-serif;
     background-color: #404040;
