@@ -175,6 +175,10 @@
     opacity: 0.75;
   }
 
+  .strip img.small {
+    height: 46px;
+  }
+
   .strip img:hover {
     opacity: 1.0;
   }
@@ -219,7 +223,6 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: 98px;
     overflow-x: auto;
     overflow-y: hidden;
     background-color: #222;
@@ -417,37 +420,15 @@
         chrome: /Chrome/.test(navigator.userAgent),
         firefox: /Firefox/.test(navigator.userAgent)
       };
-
-      var scrollbarWidth = 0;
-      $.getScrollbarWidth = function() {
-        if (!scrollbarWidth) {
-          if ( $.browser.msie ) {
-            var $textarea1 = $('<textarea cols="10" rows="2"></textarea>')
-              .css({ position: 'absolute', top: -1000, left: -1000 }).appendTo('body'),
-            $textarea2 = $('<textarea cols="10" rows="2" style="overflow: hidden;"></textarea>')
-              .css({ position: 'absolute', top: -1000, left: -1000 }).appendTo('body');
-            scrollbarWidth = $textarea1.width() - $textarea2.width();
-            $textarea1.add($textarea2).remove();
-          }
-          else {
-            var $div = $('<div />')
-              .css({ width: 100, height: 100, overflow: 'auto', position: 'absolute', top: -1000, left: -1000 })
-              .prependTo('body').append('<div />').find('div')
-              .css({ width: '100%', height: 200 });
-            scrollbarWidth = 100 - $div.width();
-            $div.parent().remove();
-          }
-        }
-        return scrollbarWidth;
-      };
   })(jQuery);
 </script>
 
 <script>
   (function() {
-    var BASE_STRIP_HEIGHT = 98;
+    var THUMB_TEMPLATE_NORMAL = '<img data-large="{{large}}" src="{{thumb}}">';
+    var THUMB_TEMPLATE_SMALL = '<img class="small" data-large="{{large}}" src="{{thumb}}">';
 
-    var THUMB_TEMPLATE = '<img data-large="{{large}}" src="{{thumb}}">';
+    var NORMAL_THUMB_MINIMUM_HEIGHT = 680;
 
     var SPINNER_OPTIONS = {
       lines: 12, length: 7, width: 4, radius: 10, color: '#ffffff',
@@ -467,8 +448,6 @@
       return a.localeCompare(b);
     });
 
-    var SCROLLBAR_HEIGHT_FUDGE = 0;
-
     $(document).ready(function() {
       var $body = $("body");
       var $doc = $(document);
@@ -480,9 +459,7 @@
       var $strip = $(".strip");
       var spinnerContainer = $(".spinner-container")[0];
       var spinner = new Spinner(SPINNER_OPTIONS);
-      var scrollbarSize = $.getScrollbarWidth();
-      var hasScrollbar = false;
-      var hasVerticalThumbs = false;
+      var hasSmallThumbs = shouldDisplaySmallThumbs();
       var loadedThumbnails = 0;
       var currentImage, lastHash;
       var hashPollInterval;
@@ -508,6 +485,10 @@
             case 'prev': moveBy(-1); break;
           }
         });
+      }
+
+      function shouldDisplaySmallThumbs() {
+        return (window.innerHeight < NORMAL_THUMB_MINIMUM_HEIGHT);
       }
 
       function notifyHashChanged(options) {
@@ -640,19 +621,9 @@
       }
 
       function checkForScrollbar() {
-        var sb = $strip[0].scrollWidth > $strip[0].clientWidth;
-
-        if (!scrollbarSize) {
-          scrollbarSize = $.getScrollbarWidth();
-        }
-
-        if (sb !== hasScrollbar) {
-          var height = BASE_STRIP_HEIGHT + (sb ? scrollbarSize : 0);
-          var bottom = height + (embedded ? 0 : $('.bitbucket').height());
-          $footer.css("height", height);
-          $middle.css("bottom", bottom);
-          hasScrollbar = sb;
-        }
+        var strip = $footer.outerHeight();
+        var branding = embedded ? 0 : $('.bitbucket').outerHeight();
+        $middle.css("bottom", strip + branding);
       }
 
       function thumbnailLoaded(event) {
@@ -693,14 +664,23 @@
       }
 
       function dimensionsChanged() {
+        var smallThumbs = shouldDisplaySmallThumbs();
+        
+        if (smallThumbs != hasSmallThumbs) {
+          hasSmallThumbs = smallThumbs;
+          renderThumbnails();
+        }
+
         centerImageVertically();
         checkForScrollbar();
         updateScrollLeft({animate: false});
       }
 
-      function createThumbnail(filename) {
-        return $(THUMB_TEMPLATE
-          .replace("{{large}}", filename)
+      function createThumbnail(filename, options) {
+        var small = options && options.small;
+        var template = small ? THUMB_TEMPLATE_SMALL : THUMB_TEMPLATE_NORMAL;
+        return $(
+          template.replace("{{large}}", filename)
           .replace("{{thumb}}", ".thumbs/" + filename)
         );
       }
@@ -834,12 +814,17 @@
           window.parent.postMessage({ message: 'nextAlbum' }, "*");
         }
       }
+        
+      function renderThumbnails() {
+        $strip.empty();
+        for (i = 0; i < IMAGES.length; i++) {
+          $strip.append(createThumbnail(IMAGES[i], {
+            small: hasSmallThumbs
+          }));
+        }
+      }
 
       function main() {
-        if ($.browser.chrome) {
-            SCROLLBAR_HEIGHT_FUDGE = -4; /* todo: why is this necessary for chrome? */
-        }
-
         var i;
 
         /* initialize the color picker */
@@ -854,9 +839,7 @@
         }
 
         /* add thumbnails to the strip */
-        for (i = 0; i < IMAGES.length; i++) {
-          $strip.append(createThumbnail(IMAGES[i]));
-        }
+        renderThumbnails();
 
         /* register events */
         $image.on("load", imageLoaded);
