@@ -660,6 +660,7 @@
         var containerHeight = $imageContainer.height();
         var imageHeight = $image.height();
         var offset = ((containerHeight - imageHeight) / 2 ) - 4;
+        offset = Math.max(offset, 0); /* no smaller than 0 */
         $image.css({"margin-top": offset, "visibility": "visible"});
       }
 
@@ -670,6 +671,17 @@
           hasSmallThumbs = smallThumbs;
           renderThumbnails();
         }
+
+        /* we use an old trick to auto-scale the image inside of its 
+        container by setting max-width and max-height to 100%. as of 
+        10/18/2014 this is broken in Chrome, cross platform. instead,
+        we need to manually set the max-height and max-width to pixel
+        values. hopefully this is fixed soon; this hack should be 
+        checked and removed at some point... */
+        $image.css({
+          'max-height': $imageContainer.outerHeight(),
+          'max-width': $imageContainer.outerWidth()
+        });
 
         centerImageVertically();
         checkForScrollbar();
