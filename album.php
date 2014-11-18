@@ -132,7 +132,7 @@
   }
 
   html {
-    /* sometimes webkit displays a vertical when we're embedded.
+    /* sometimes webkit displays a vertical scrollbar when we're embedded.
     this fixes that. */
     overflow: hidden;
   }
