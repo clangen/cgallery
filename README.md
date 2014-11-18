@@ -2,7 +2,7 @@ cgallery
 =========
 **a simple photo management system** that works well with webkit, gecko, and ie10+.
 
-cgallery is written in less than 2000 lines of php+js+css+html. it also uses jquery and spin.js. the most basic use case requires no configuration: just drop **album.php** in a directory of images and you're done.
+cgallery is small, (relatively) self-contained photo gallery wirtten in php+js+css+html. it also uses jquery and spin.js. the most basic use case requires no configuration: just drop **album.php** in a directory of images and you're done.
 
 more advanced use cases support nested sub-directories, and require minimal configuration. **series.php** is used to index a directory that contains directories of albums and other series. cgallery sources include an install script named **install.php** that can be used to manage these types of configurations.
 
