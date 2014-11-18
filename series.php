@@ -84,6 +84,10 @@
     box-shadow: 0 0 15px #222;
   }
 
+  .small .main {
+    left: 190px;
+  }
+
   .left {
     position: absolute;
     left: 10px;
@@ -97,11 +101,21 @@
     -webkit-overflow-scrolling: touch;
   }
 
+  .small .left {
+    font-size: 75%;
+    width: 160px;
+  }
+
   ul, li {
     margin: 0;
     padding: 0;
     padding-bottom: 6px;
     list-style-type: none;
+  }
+
+  li:before {
+    content: "• ";
+    color: #666;
   }
 
   a:active { /* ie draws a grey background by default */
@@ -110,7 +124,7 @@
 
   .item a {
     color: #aaa;
-    font-size: 12px;
+    font-size: 0.8em;
     text-decoration: none;
   }
 
@@ -130,11 +144,10 @@
 
   .title {
     font-weight: bold;
-    font-size: 24px;
+    font-size: 2em;
     color: #666;
     text-shadow: 0 0 8px #222;
-    text-decoration: underline;
-    padding-bottom: 4px;
+    padding-bottom: 6px;
   }
 
   .albums {
@@ -148,6 +161,10 @@
   .date {
     font-size: 60%;
     color: #666;
+  }
+
+  .small .date {
+    display: none;
   }
 
   .album-list {
@@ -308,14 +325,14 @@
 
     var LIST_ITEM_TEMPLATE =
       '<li class="item album-name">' +
-        '<a href="{{url}}" data-index="{{index}}" style="font-size: {{size}}px;">' +
+        '<a href="{{url}}" data-index="{{index}}" style="font-size: {{size}}em;">' +
           '{{caption}}' +
         '</a>' +
       '</li>';
 
     var LIST_ITEM_TEMPLATE_WITH_DATE =
       '<li class="item album-name">' +
-        '<a href="{{url}}" data-index="{{index}}" style="font-size: {{size}}px;">' +
+        '<a href="{{url}}" data-index="{{index}}" style="font-size: {{size}}em;">' +
           '{{caption}}' +
         '</a>' +
         '<span class="date"> ({{date}})</span>' +
@@ -352,8 +369,9 @@
       ?>
     ];
 
-    var LIST_ITEM_MAX_FONT_SIZE = 16;
-    var LIST_ITEM_MIN_FONT_SIZE = 12; /* needs to match '.item a' */
+    var LIST_ITEM_MAX_FONT_SIZE = 1.1;
+    var LIST_ITEM_MIN_FONT_SIZE = 0.8; /* needs to match '.item a' */
+    var LIST_ITEM_MIN_ITEM_COUNT = 4;
     var NORMAL_LIST_FONT_MINIMUM_HEIGHT = 680;
 
     var lastSelected = { }; /* key=album, value=image */
@@ -636,6 +654,7 @@
 
     $(document).ready(function() {
       var $iframe = null;
+      var $body = $("body");
       var $main = $('.main');
       var $albums = $('.albums');
       var $spinnerContainer = $('.spinner-container');
@@ -850,13 +869,12 @@
       };
 
       var checkEnableSmallText = function() {
-        /* same check as in album.php */
-        var css = { "font-size" : "100%" };
         if (window.innerHeight < NORMAL_LIST_FONT_MINIMUM_HEIGHT) {
-          css["font-size"] = "75%";
+          $body.addClass('small');
         }
-
-        $albums.css(css);
+        else {
+          $body.removeClass('small');
+        }
       };
 
       var initEventListeners = function() {
@@ -889,7 +907,7 @@
           window.location.href = url;
         });
 
-        $("body").on("keydown", function(event) {
+        $body.on("keydown", function(event) {
             if (event.altKey || event.metaKey) {
                 return true; /* don't swallow browser back/forward shortcuts */
             }
@@ -915,9 +933,7 @@
         /* lots of entries? we'll use a larger font to bring emphesis to the
         newer items. we'll step it down 1 point at a time until we reach our
         default size */
-        var fontSizeDelta = LIST_ITEM_MAX_FONT_SIZE - LIST_ITEM_MIN_FONT_SIZE;
-
-        var font = (model.length >= fontSizeDelta) ?
+        var font = (model.length >= LIST_ITEM_MIN_ITEM_COUNT) ?
           LIST_ITEM_MAX_FONT_SIZE : LIST_ITEM_MIN_FONT_SIZE;
 
         for (i = 0; i < model.length; i++) {
@@ -948,7 +964,7 @@
             }
 
             $albumList.append(html);
-            font = Math.max(LIST_ITEM_MIN_FONT_SIZE, font - 1);
+            font = Math.max(LIST_ITEM_MIN_FONT_SIZE, font - 0.1);
         }
 
         var initialHash = getHashFromUrl() || '';
