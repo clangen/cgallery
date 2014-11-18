@@ -109,7 +109,6 @@
   ul, li {
     margin: 0;
     padding: 0;
-    padding-bottom: 6px;
     list-style-type: none;
   }
 
@@ -324,15 +323,15 @@
     var LOCAL = (window.location.protocol === "file:");
 
     var LIST_ITEM_TEMPLATE =
-      '<li class="item album-name">' +
-        '<a href="{{url}}" data-index="{{index}}" style="font-size: {{size}}em;">' +
+      '<li class="item album-name" style="line-height: {{line-height}}em;">' +
+        '<a href="{{url}}" data-index="{{index}}" style="font-size: {{font-size}}em;">' +
           '{{caption}}' +
         '</a>' +
       '</li>';
 
     var LIST_ITEM_TEMPLATE_WITH_DATE =
-      '<li class="item album-name">' +
-        '<a href="{{url}}" data-index="{{index}}" style="font-size: {{size}}em;">' +
+      '<li class="item album-name" style="line-height: {{line-height}}em;">' +
+        '<a href="{{url}}" data-index="{{index}}" style="font-size: {{font-size}}em;">' +
           '{{caption}}' +
         '</a>' +
         '<span class="date"> ({{date}})</span>' +
@@ -948,7 +947,8 @@
                 .replace("{{caption}}", item.caption)
                 .replace("{{index}}", i)
                 .replace("{{date}}", item.date)
-                .replace("{{size}}", font);
+                .replace("{{font-size}}", font)
+                .replace("{{line-height}}", font + 0.5);
             }
             else if (item.type === 'series') {
               template = LIST_ITEM_SERIES_TEMPLATE;
@@ -960,7 +960,8 @@
                 .replace("{{url}}", url + "?b=1")
                 .replace("{{caption}}", item.caption)
                 .replace("{{index}}", i)
-                .replace("{{size}}", font);
+                .replace("{{font-size}}", font)
+                .replace("{{line-height}}", font + 0.5);
             }
 
             $albumList.append(html);
