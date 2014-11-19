@@ -85,7 +85,7 @@
   }
 
   .small .main {
-    left: 190px;
+    left: 180px;
   }
 
   .left {
@@ -102,8 +102,8 @@
   }
 
   .small .left {
-    font-size: 75%;
-    width: 160px;
+    font-size: 80%;
+    width: 150px;
   }
 
   ul, li {
