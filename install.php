@@ -132,6 +132,9 @@
       popdir();
     }
 
+    check_rm($html);
+    check_rm($php);
+    
     if ($mode == "static" || $mode == "local") {
       print "  generating thumbnails to $thumbs using $album\n";
       exec_to_stdout("php $album -t 1"); /* create thumbnails (and log to stdout) */
@@ -168,6 +171,9 @@
       $type = guess_type($current);
       install($current, $type);
     }
+    
+    check_rm($html);
+    check_rm($php);
 
     if ($mode == "static" || $mode == "local") { /* generate a static html file. this
       will implicitly trigger a thumbnail refresh */
@@ -196,9 +202,6 @@
     /* use override if specified, otherwise we'll
     default to album. */
     $type = $override ?: $type;
-
-    check_rm($dir . "/index.html");
-    check_rm($dir . "/index.php");
 
     delete_if_auto_series($dir);
 
