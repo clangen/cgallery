@@ -132,7 +132,7 @@
   }
 
   html {
-    /* sometimes webkit displays a vertical when we're embedded.
+    /* sometimes webkit displays a vertical scrollbar when we're embedded.
     this fixes that. */
     overflow: hidden;
   }
@@ -140,15 +140,6 @@
   body {
     font-family: sans-serif;
     background-color: #404040;
-  }
-
-  .header {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 25px;
-    text-align: center;
   }
 
   ul, li {
@@ -239,31 +230,12 @@
     position: absolute;
     left: 0;
     right: 0;
-    top: 25px;
+    top: 4px;
     bottom: 100px;
   }
 
   .project-link .middle {
     bottom: 120px;
-  }
-
-  .color-picker {
-    display: inline-block;
-    padding-top: 6px;
-  }
-
-  .color-button {
-    display: inline-block;
-    width: 15px;
-    height: 15px;
-    background-color: #444;
-    border: 1px solid #ccc;
-    cursor: pointer;
-    box-shadow: 0 0 4px #111
-  }
-
-  .color-button:hover {
-    border-color: #666;
   }
 
   .pseudo-button {
@@ -355,6 +327,7 @@
     -moz-box-sizing: border-box;
     pointer-events: all;
     cursor: pointer;
+    box-shadow: 0 0 4px #111;
   }
 
   .loading .current-image {
@@ -459,7 +432,7 @@
       var $strip = $(".strip");
       var spinnerContainer = $(".spinner-container")[0];
       var spinner = new Spinner(SPINNER_OPTIONS);
-      var hasSmallThumbs = shouldDisplaySmallThumbs();
+      var smallModeOn = shouldEnableSmallMode();
       var loadedThumbnails = 0;
       var currentImage, lastHash;
       var hashPollInterval;
@@ -487,7 +460,7 @@
         });
       }
 
-      function shouldDisplaySmallThumbs() {
+      function shouldEnableSmallMode() {
         return (window.innerHeight < NORMAL_THUMB_MINIMUM_HEIGHT);
       }
 
@@ -665,18 +638,18 @@
       }
 
       function dimensionsChanged() {
-        var smallThumbs = shouldDisplaySmallThumbs();
-        
-        if (smallThumbs != hasSmallThumbs) {
-          hasSmallThumbs = smallThumbs;
+        var smallMode = shouldEnableSmallMode();
+
+        if (smallMode !== smallModeOn) {
+          smallModeOn = smallMode;
           renderThumbnails();
         }
 
-        /* we use an old trick to auto-scale the image inside of its 
-        container by setting max-width and max-height to 100%. as of 
+        /* we use an old trick to auto-scale the image inside of its
+        container by setting max-width and max-height to 100%. as of
         10/18/2014 this is broken in Chrome, cross platform. instead,
         we need to manually set the max-height and max-width to pixel
-        values. hopefully this is fixed soon; this hack should be 
+        values. hopefully this is fixed soon; this hack should be
         checked and removed at some point... */
         $image.css({
           'max-height': $imageContainer.outerHeight(),
@@ -732,16 +705,6 @@
 
       function imageClicked(event) {
         window.open($image.attr("src"));
-      }
-
-      function colorButtonClicked(event) {
-        var bg = $(event.target).attr("data-bg");
-
-        if (bg) {
-          $('body').css("background-color", bg);
-          writeHash();
-          notifyHashChanged();
-        }
       }
 
       function moveBy(offset) {
@@ -826,29 +789,18 @@
           window.parent.postMessage({ message: 'nextAlbum' }, "*");
         }
       }
-        
+
       function renderThumbnails() {
         $strip.empty();
         for (i = 0; i < IMAGES.length; i++) {
           $strip.append(createThumbnail(IMAGES[i], {
-            small: hasSmallThumbs
+            small: smallModeOn
           }));
         }
       }
 
       function main() {
         var i;
-
-        /* initialize the color picker */
-        var colorButtons = $(".color-picker .color-button");
-        for (i = 0; i < colorButtons.length; i++) {
-          var $button = $(colorButtons[i]);
-          var bg = $button.attr("data-bg");
-
-          if (bg) {
-            $button.css({"background-color": bg});
-          }
-        }
 
         /* add thumbnails to the strip */
         renderThumbnails();
@@ -858,7 +810,6 @@
         $image.on("click", imageClicked);
         $win.on("resize", dimensionsChanged);
         $doc.on("click", ".strip img", thumbnailClicked);
-        $doc.on("click", ".color-picker .color-button", colorButtonClicked);
         $doc.on("click", ".button.prev", previous);
         $doc.on("click", ".button.next", next);
         $body.on("keydown", keyPressed);
@@ -876,16 +827,6 @@
 </head>
 
 <body class="loading">
-    <div class="header">
-        <ul class="color-picker">
-            <li data-bg="#000000" class="color-button"></li>
-            <li data-bg="#181818" class="color-button"></li>
-            <li data-bg="#404040" class="color-button"></li>
-            <li data-bg="#808080" class="color-button"></li>
-            <li data-bg="#b0b0b0" class="color-button"></li>
-            <li data-bg="#ffffff" class="color-button"></li>
-        </ul>
-    </div>
     <div class="middle">
         <div class="pseudo-button prev">
           <div class="button prev">&lt;</div>

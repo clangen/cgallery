@@ -84,6 +84,10 @@
     box-shadow: 0 0 15px #222;
   }
 
+  .small .main {
+    left: 180px;
+  }
+
   .left {
     position: absolute;
     left: 10px;
@@ -97,11 +101,20 @@
     -webkit-overflow-scrolling: touch;
   }
 
+  .small .left {
+    font-size: 80%;
+    width: 150px;
+  }
+
   ul, li {
     margin: 0;
     padding: 0;
-    padding-bottom: 6px;
     list-style-type: none;
+  }
+
+  li:before {
+    content: "• ";
+    color: #666;
   }
 
   a:active { /* ie draws a grey background by default */
@@ -110,7 +123,7 @@
 
   .item a {
     color: #aaa;
-    font-size: 12px;
+    font-size: 0.8em;
     text-decoration: none;
   }
 
@@ -130,11 +143,10 @@
 
   .title {
     font-weight: bold;
-    font-size: 24px;
+    font-size: 2em;
     color: #666;
     text-shadow: 0 0 8px #222;
-    text-decoration: underline;
-    padding-bottom: 4px;
+    padding-bottom: 6px;
   }
 
   .albums {
@@ -148,6 +160,10 @@
   .date {
     font-size: 60%;
     color: #666;
+  }
+
+  .small .date {
+    display: none;
   }
 
   .album-list {
@@ -307,15 +323,15 @@
     var LOCAL = (window.location.protocol === "file:");
 
     var LIST_ITEM_TEMPLATE =
-      '<li class="item album-name">' +
-        '<a href="{{url}}" data-index="{{index}}">' +
+      '<li class="item album-name" style="line-height: {{line-height}}em;">' +
+        '<a href="{{url}}" data-index="{{index}}" style="font-size: {{font-size}}em;">' +
           '{{caption}}' +
         '</a>' +
       '</li>';
 
     var LIST_ITEM_TEMPLATE_WITH_DATE =
-      '<li class="item album-name">' +
-        '<a href="{{url}}" data-index="{{index}}">' +
+      '<li class="item album-name" style="line-height: {{line-height}}em;">' +
+        '<a href="{{url}}" data-index="{{index}}" style="font-size: {{font-size}}em;">' +
           '{{caption}}' +
         '</a>' +
         '<span class="date"> ({{date}})</span>' +
@@ -351,6 +367,11 @@
         }
       ?>
     ];
+
+    var LIST_ITEM_MAX_FONT_SIZE = 1.1;
+    var LIST_ITEM_MIN_FONT_SIZE = 0.8; /* needs to match '.item a' */
+    var LIST_ITEM_MIN_ITEM_COUNT = 4;
+    var NORMAL_LIST_FONT_MINIMUM_HEIGHT = 680;
 
     var lastSelected = { }; /* key=album, value=image */
     var currentAlbum = '';
@@ -409,8 +430,27 @@
       add(ALBUMS, 'album');
       add(SERIES, 'series');
 
+      var createDateKey = function(date) {
+        var result = date || "0000-00-00";
+        if (result.length === "0000-00".length) {
+          result += "-00";
+        }
+        return result;
+      }
+
       result = result.sort(function(a, b) {
-        return a.name.localeCompare(b.name);
+        /* by date first... */
+        var defaultDate = "0000-00-00";
+        var dateA = createDateKey(a.date);
+        var dateB = createDateKey(b.date);
+        var dateCompareResult = dateB.localeCompare(dateA);
+
+        /* secondary: by name */
+        if (dateA === dateB) {
+          return a.name.localeCompare(b.name);
+        }
+
+        return dateCompareResult;
       });
 
       /* finds an item by name and type */
@@ -613,7 +653,9 @@
 
     $(document).ready(function() {
       var $iframe = null;
+      var $body = $("body");
       var $main = $('.main');
+      var $albums = $('.albums');
       var $spinnerContainer = $('.spinner-container');
       var spinner = new Spinner(SPINNER_OPTIONS);
       var albumLoading = false;
@@ -825,6 +867,15 @@
         }
       };
 
+      var checkEnableSmallText = function() {
+        if (window.innerHeight < NORMAL_LIST_FONT_MINIMUM_HEIGHT) {
+          $body.addClass('small');
+        }
+        else {
+          $body.removeClass('small');
+        }
+      };
+
       var initEventListeners = function() {
         $('.embedded').on('load', function() {
           $('.embedded').removeClass('hidden');
@@ -855,7 +906,7 @@
           window.location.href = url;
         });
 
-        $("body").on("keydown", function(event) {
+        $body.on("keydown", function(event) {
             if (event.altKey || event.metaKey) {
                 return true; /* don't swallow browser back/forward shortcuts */
             }
@@ -867,12 +918,23 @@
               case 40: selectNextAlbum(); break;
             }
         });
+
+        $(window).on("resize", checkEnableSmallText);
       };
 
       var render = function() {
+        checkEnableSmallText();
+
         /* generate album list, add to DOM */
         var $albumList = $(".album-list");
         var item, caption, parts, template, html, url;
+
+        /* lots of entries? we'll use a larger font to bring emphesis to the
+        newer items. we'll step it down 1 point at a time until we reach our
+        default size */
+        var font = (model.length >= LIST_ITEM_MIN_ITEM_COUNT) ?
+          LIST_ITEM_MAX_FONT_SIZE : LIST_ITEM_MIN_FONT_SIZE;
+
         for (i = 0; i < model.length; i++) {
             item = model[i];
 
@@ -884,7 +946,9 @@
                 .replace("{{url}}", item.name)
                 .replace("{{caption}}", item.caption)
                 .replace("{{index}}", i)
-                .replace("{{date}}", item.date);
+                .replace("{{date}}", item.date)
+                .replace("{{font-size}}", font)
+                .replace("{{line-height}}", font + 0.5);
             }
             else if (item.type === 'series') {
               template = LIST_ITEM_SERIES_TEMPLATE;
@@ -895,10 +959,13 @@
               html = template
                 .replace("{{url}}", url + "?b=1")
                 .replace("{{caption}}", item.caption)
-                .replace("{{index}}", i);
+                .replace("{{index}}", i)
+                .replace("{{font-size}}", font)
+                .replace("{{line-height}}", font + 0.5);
             }
 
             $albumList.append(html);
+            font = Math.max(LIST_ITEM_MIN_FONT_SIZE, font - 0.1);
         }
 
         var initialHash = getHashFromUrl() || '';
