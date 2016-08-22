@@ -22,7 +22,7 @@ cgallery looks something like this:
 
 ### download
 ```sh
-git clone git@bitbucket.org:clangen/cgallery.git
+git clone git@github.com:clangen/cgallery.git
 ```
 
 ### using install.php

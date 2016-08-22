@@ -179,7 +179,7 @@
     opacity: 1.0;
   }
 
-  .bitbucket {
+  .github {
     display: none;
     background-color: rgb(46, 46, 46);
     position: absolute;
@@ -191,20 +191,20 @@
     height: 20px;
   }
 
-  .bitbucket a {
+  .github a {
     color: #666;
     text-shadow: 0 0 3px #222;
     font-size: 11px;
     text-decoration: none;
   }
 
-  .bitbucket a:hover {
+  .github a:hover {
     color: #bbb;
     text-shadow: 0 0 3px #000;
     text-decoration: underline;
   }
 
-  .project-link .bitbucket {
+  .project-link .github {
     display: block;
   }
 
@@ -595,7 +595,7 @@
 
       function checkForScrollbar() {
         var strip = $footer.outerHeight();
-        var branding = embedded ? 0 : $('.bitbucket').outerHeight();
+        var branding = embedded ? 0 : $('.github').outerHeight();
         $middle.css("bottom", strip + branding);
       }
 
@@ -845,8 +845,8 @@
     <div class="footer">
         <div class="strip"></div>
     </div>
-  <div class="bitbucket">
-    <a href="https://bitbucket.org/clangen/cgallery" target="_new">https://bitbucket.org/clangen/cgallery</a>
+  <div class="github">
+    <a href="https://github.com/clangen/cgallery" target="_new">https://github.com/clangen/cgallery</a>
   </div>
 </body>
 </html>

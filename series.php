@@ -1027,7 +1027,7 @@
     </div>
   </div>
   <div class="footer">
-    <a href="https://bitbucket.org/clangen/cgallery" target="_new">https://bitbucket.org/clangen/cgallery</a>
+    <a href="https://github.com/clangen/cgallery" target="_new">https://github.com/clangen/cgallery</a>
   </div>
 </body>
 
