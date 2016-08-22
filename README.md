@@ -10,6 +10,13 @@ cgallery also supports keyboard navigation and deep-linkable urls.
 
 [a demo is available here.](http://casey.io/cgallery/demo)
 
+### screenshot
+
+cgallery looks something like this:
+
+![windows screenshot](https://raw.githubusercontent.com/clangen/clangen-projects-static/master/cgallery/screenshots/cgallery01.png)
+
+
 ### requirements
 **cgallery** requires a **web server** with **php** and the **gd** image library.
 
