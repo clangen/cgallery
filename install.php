@@ -1,6 +1,6 @@
 <?php
   /*
-   * cgallery v2.2
+   * cgallery v2.3
    *
    * install.php:
    *

@@ -1,6 +1,6 @@
 <?php /** series.php **/
   /*
-  * cgallery v2.2
+  * cgallery v2.3
   *
   * series.php:
   * - indexes a directory of albums and other series.

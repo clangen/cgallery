@@ -1,6 +1,6 @@
 <?php /** album.php **/
   /*
-  * cgallery v2.2
+  * cgallery v2.3
   *
   * album.php:
   * - indexes a directory of images and creates thumbnails.
