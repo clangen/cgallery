@@ -119,7 +119,7 @@ there's not a good reason, honestly. image hosting services are generally cheap/
 
 > why are are js and css included in the php files?
 
-this was a conscience decision. the scripts seem more useful when they are completely self-contained. just drop the php file in a directory and go. the consequence is that, in a couple cases, there is a small amount of code duplicated between album.php and series.php. yes, this makes maintenance slightly more annoying, but it also makes the system easier to use.
+this was a conscious decision. the scripts seem more useful when they are completely self-contained. just drop the php file in a directory and go. the consequence is that, in a couple cases, there is a small amount of code duplicated between album.php and series.php. yes, this makes maintenance slightly more annoying, but it also makes the system easier to use.
 
 > why aren't the javascript and css minified?
 
