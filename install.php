@@ -60,6 +60,11 @@
   }
 
   function check_rm($file) {
+    if (is_dir($file)) {
+        rmdir($file);
+        return;
+    }
+
     if (file_exists($file)) {
       print "  deleting " . $file . "\n";
       unlink($file);
@@ -132,6 +137,7 @@
       popdir();
     }
 
+    check_rm($thumbs);
     check_rm($html);
     check_rm($php);
     
@@ -171,7 +177,7 @@
       $type = guess_type($current);
       install($current, $type);
     }
-    
+
     check_rm($html);
     check_rm($php);
 
